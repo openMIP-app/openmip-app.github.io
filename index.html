@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>openMIP</title>
+  <!-- Apply stored theme before first paint to prevent flash -->
+  <script>(function(){if(localStorage.getItem('openMIP-theme')==='light')document.documentElement.classList.add('light');})();</script>
+  <link rel="stylesheet" href="src/theme.css" />
+  <style>
+    /* ── Hero ── */
+    .hero {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 5rem 1.5rem 3rem;
+      text-align: center;
+      gap: 1.25rem;
+    }
+
+    .hero-eyebrow {
+      font-size: 0.75rem;
+      font-weight: 700;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+    }
+
+    .hero h1 {
+      font-size: clamp(3rem, 8vw, 5.5rem);
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      line-height: 1;
+      background: linear-gradient(135deg, #e0d0ff 0%, #c4b0f0 40%, #90c8f0 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .hero h1 a {
+      text-decoration: none;
+      color: inherit;
+      -webkit-text-fill-color: inherit;
+    }
+
+    .hero-tagline {
+      font-size: clamp(1rem, 2.5vw, 1.35rem);
+      color: var(--text-muted);
+      font-style: italic;
+      letter-spacing: 0.01em;
+    }
+
+    /* ── Upload card ── */
+    .upload-card {
+      width: 100%;
+      max-width: 560px;
+      margin-top: 1.5rem;
+    }
+
+    .drop-zone {
+      border: 2px dashed var(--border-hi);
+      border-radius: 16px;
+      background: var(--bg-panel);
+      padding: 2.5rem 2rem;
+      cursor: pointer;
+      transition: border-color 0.2s, background 0.2s;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .drop-zone:hover,
+    .drop-zone.drag-over {
+      border-color: var(--accent);
+      background: var(--bg-element);
+    }
+
+    .drop-icon {
+      width: 48px;
+      height: 48px;
+      border-radius: 12px;
+      background: var(--bg-element);
+      border: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.5rem;
+    }
+
+    .drop-primary {
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: var(--text);
+    }
+
+    .drop-secondary {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+    }
+
+    .drop-secondary span {
+      color: var(--accent);
+      cursor: pointer;
+      text-decoration: underline;
+      text-underline-offset: 2px;
+    }
+
+    /* hidden real file input */
+    #file-input { display: none; }
+
+    /* selected file name */
+    #file-name {
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      min-height: 1.2em;
+      text-align: center;
+    }
+
+    #file-name.ready { color: var(--accent); font-weight: 600; }
+
+    /* Open button */
+    #open-btn {
+      margin-top: 0.5rem;
+      width: 100%;
+      padding: 0.75rem;
+      border-radius: 10px;
+      border: none;
+      background: var(--accent);
+      color: #fff;
+      font-size: 0.95rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.15s, opacity 0.15s;
+      opacity: 0.4;
+      pointer-events: none;
+    }
+
+    #open-btn.enabled {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    #open-btn.enabled:hover { background: var(--accent-hi); }
+
+    /* ── Divider ── */
+    .divider {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      margin-top: 1.25rem;
+      color: var(--text-muted);
+      font-size: 0.78rem;
+    }
+
+    .divider::before,
+    .divider::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--border);
+    }
+
+    /* Demo link */
+    .demo-link {
+      display: inline-block;
+      margin-top: 1rem;
+      padding: 0.6rem 1.5rem;
+      border-radius: 8px;
+      border: 1.5px solid var(--border-hi);
+      color: var(--text-dim);
+      font-size: 0.85rem;
+      text-decoration: none;
+      transition: border-color 0.15s, color 0.15s, background 0.15s;
+      background: var(--bg-panel);
+    }
+
+    .demo-link:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+      background: var(--bg-element);
+    }
+
+    /* ── Footer ── */
+    footer {
+      padding: 1.25rem 2.5rem;
+      border-top: 1px solid var(--border);
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      justify-content: space-between;
+    }
+
+    /* Fixes centering */
+    footer > * { flex: 1; }
+    footer > :nth-child(2) { text-align: center; }
+    footer > :last-child { display: flex; flex: wrap; justify-content: flex-end; flex-shrink: 0;}
+  </style>
+</head>
+<body>
+
+<header>
+  <h1><a href="index.html">openMIP</a></h1>
+</header>
+
+<main class="hero">
+  <!-- <p class="hero-eyebrow">Molecular Interaction Potential</p> -->
+  <h1>openMIP</h1>
+  <p class="hero-tagline">Open sourced molecular imprinting</p>
+
+  <div class="upload-card">
+    <div class="drop-zone" id="drop-zone">
+      <div class="drop-icon">&#x1F9EC;</div>
+      <p class="drop-primary">Drop a PDB file here</p>
+      <p class="drop-secondary">or <span id="browse-link">browse your computer</span></p>
+    </div>
+    <input type="file" id="file-input" accept=".pdb" />
+    <p id="file-name">&nbsp;</p>
+    <button id="open-btn">Open in Viewer</button>
+
+    <div class="divider">or try a demo</div>
+    <a class="demo-link" href="viewer.html">Explore demo molecules →</a>
+  </div>
+</main>
+
+<footer>
+  <span>openMIP</span>
+  <span>PDB files are processed entirely in your browser. Nothing is uploaded to any server.</span>
+  <span><button id="theme-toggle" aria-label="Toggle theme"></button></span>
+</footer>
+
+<script>
+(function () {
+  const dropZone   = document.getElementById('drop-zone');
+  const fileInput  = document.getElementById('file-input');
+  const fileNameEl = document.getElementById('file-name');
+  const openBtn    = document.getElementById('open-btn');
+  const browseLink = document.getElementById('browse-link');
+
+  let selectedFile = null;
+
+  // ── File selection helpers ──────────────────────────────────────
+  function setFile(file) {
+    if (!file || !file.name.toLowerCase().endsWith('.pdb')) {
+      fileNameEl.textContent = 'Please select a .pdb file.';
+      fileNameEl.classList.remove('ready');
+      openBtn.classList.remove('enabled');
+      selectedFile = null;
+      return;
+    }
+    selectedFile = file;
+    fileNameEl.textContent = file.name;
+    fileNameEl.classList.add('ready');
+    openBtn.classList.add('enabled');
+  }
+
+  // ── Browse click ────────────────────────────────────────────────
+  browseLink.addEventListener('click', e => {
+    e.stopPropagation();
+    fileInput.click();
+  });
+
+  dropZone.addEventListener('click', () => fileInput.click());
+
+  fileInput.addEventListener('change', () => {
+    setFile(fileInput.files[0] || null);
+  });
+
+  // ── Drag-and-drop ───────────────────────────────────────────────
+  dropZone.addEventListener('dragover', e => {
+    e.preventDefault();
+    dropZone.classList.add('drag-over');
+  });
+
+  ['dragleave', 'dragend'].forEach(ev =>
+    dropZone.addEventListener(ev, () => dropZone.classList.remove('drag-over'))
+  );
+
+  dropZone.addEventListener('drop', e => {
+    e.preventDefault();
+    dropZone.classList.remove('drag-over');
+    setFile(e.dataTransfer.files[0] || null);
+  });
+
+  // ── Open in viewer ──────────────────────────────────────────────
+  openBtn.addEventListener('click', () => {
+    if (!selectedFile) return;
+    const reader = new FileReader();
+    reader.onload = e => {
+      try {
+        // Pass the file to viewer.html via sessionStorage
+        sessionStorage.setItem('customPdb', JSON.stringify({
+          name: selectedFile.name,
+          text: e.target.result,
+        }));
+        window.location.href = 'viewer.html';
+      } catch (err) {
+        fileNameEl.textContent = 'Error: file too large for sessionStorage.';
+        fileNameEl.classList.remove('ready');
+      }
+    };
+    reader.readAsText(selectedFile);
+  });
+})();
+</script>
+
+<script src="src/theme.js"></script>
+</body>
+</html>
