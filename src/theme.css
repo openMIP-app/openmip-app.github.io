@@ -1,0 +1,126 @@
+/* ── openMIP shared theme ── */
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+/* ── Dark theme (default) ── */
+:root {
+  --bg-page:           #141414;
+  --bg-panel:          #1e1e1e;
+  --bg-element:        #282828;
+  --border:            #383838;
+  --border-hi:         #505050;
+  --text:              #f0ecff;
+  --text-muted:        #9080b8;
+  --text-dim:          #c0b4e0;
+  --accent:            #c4b0f0;
+  --accent-hi:         #a890d8;
+  --btn-active-bg:     #6b52b0;
+  --btn-active-border: #9b7dd4;
+  --viewer-bg-hex:     0x141414;
+}
+
+/* ── Light theme ── */
+/* Applied via html.light so a tiny inline <head> script can set it
+   before first paint, preventing a flash of the wrong theme. */
+html.light {
+  --bg-page:           #f4f0fb;
+  --bg-panel:          #ffffff;
+  --bg-element:        #ece6f8;
+  --border:            #d5c9f0;
+  --border-hi:         #b8a7e0;
+  --text:              #2d1f5e;
+  --text-muted:        #9080b8;
+  --text-dim:          #6657a0;
+  --accent:            #8b6fd4;
+  --accent-hi:         #7a5fc0;
+  --btn-active-bg:     #9b7dd4;
+  --btn-active-border: #c4b0f0;
+  --viewer-bg-hex:     0xf4f0fb;
+}
+
+/* ── Base ── */
+body {
+  font-family: 'Segoe UI', system-ui, sans-serif;
+  background: var(--bg-page);
+  color: var(--text);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  transition: background 0.2s, color 0.2s;
+}
+
+/* ── Header ── */
+header {
+  padding: 0.85rem 2rem;
+  background: var(--bg-panel);
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+}
+
+header h1 {
+  font-size: 1.5rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  line-height: 1;
+  background: linear-gradient(135deg, #e0d0ff 0%, #c4b0f0 40%, #90c8f0 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  /* Fallback for browsers without background-clip:text */
+  color: var(--accent);
+}
+
+header h1 a {
+  text-decoration: none;
+  color: inherit;
+  -webkit-text-fill-color: inherit;
+}
+
+/* ── Nav tabs ── */
+.nav-tabs {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  margin-left: 0.5rem;
+}
+
+.nav-tab {
+  padding: 0.3rem 0.75rem;
+  font-size: 0.8rem;
+  border-radius: 6px;
+  text-decoration: none;
+  color: var(--text-muted);
+  transition: background 0.15s, color 0.15s;
+}
+
+.nav-tab:hover {
+  background: var(--bg-element);
+  color: var(--text);
+}
+
+.nav-tab.active {
+  background: var(--bg-element);
+  color: var(--text);
+  font-weight: 600;
+}
+
+/* ── Theme toggle button ── */
+#theme-toggle {
+  background: none;
+  border: 1px solid var(--border-hi);
+  border-radius: 999px;
+  padding: 0.15rem 0.6rem;
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: border-color 0.15s, color 0.15s;
+  line-height: 1.4;
+  flex-shrink: 0;
+}
+
+#theme-toggle:hover {
+  border-color: var(--accent);
+  color: var(--text);
+}
