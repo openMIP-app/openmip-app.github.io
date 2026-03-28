@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>About — openMIP</title>
+  <!-- Apply stored theme before first paint to prevent flash -->
+  <script>(function(){if(localStorage.getItem('openMIP-theme')==='light')document.documentElement.classList.add('light');})();</script>
+  <link rel="stylesheet" href="src/theme.css" />
+  <style>
+    /* ── Content ── */
+    main {
+      flex: 1;
+      max-width: 740px;
+      width: 100%;
+      margin: 0 auto;
+      padding: 3.5rem 1.5rem 4rem;
+      display: flex;
+      flex-direction: column;
+      gap: 3rem;
+    }
+
+    /* Page hero title */
+    .page-hero {
+      font-size: clamp(3rem, 8vw, 5.5rem);
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      line-height: 1;
+      background: linear-gradient(135deg, #e0d0ff 0%, #c4b0f0 40%, #90c8f0 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .page-subtitle {
+      margin-top: 0.5rem;
+      font-size: 1rem;
+      color: var(--text-muted);
+      line-height: 1.6;
+    }
+
+    /* Sections */
+    section { display: flex; flex-direction: column; gap: 0.75rem; }
+
+    section h2 {
+      font-size: 0.7rem;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      padding-bottom: 0.5rem;
+      border-bottom: 1px solid var(--border);
+    }
+
+    section p {
+      font-size: 0.95rem;
+      color: var(--text-dim);
+      line-height: 1.75;
+    }
+
+    section p + p { margin-top: 0.5rem; }
+
+    /* Feature grid */
+    .feature-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 0.75rem;
+    }
+
+    .feature-card {
+      background: var(--bg-panel);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 1rem 1.1rem;
+    }
+
+    .feature-card h3 {
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--accent);
+      margin-bottom: 0.35rem;
+    }
+
+    .feature-card p {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      line-height: 1.55;
+    }
+
+    /* Tech stack pills */
+    .pill-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+
+    .pill {
+      padding: 0.25rem 0.75rem;
+      border-radius: 999px;
+      font-size: 0.78rem;
+      background: var(--bg-element);
+      border: 1px solid var(--border);
+      color: var(--text-dim);
+    }
+
+    /* CTA */
+    .cta-row {
+      display: flex;
+      gap: 0.75rem;
+      flex-wrap: wrap;
+    }
+
+    .cta-btn {
+      padding: 0.6rem 1.4rem;
+      border-radius: 8px;
+      font-size: 0.88rem;
+      font-weight: 600;
+      text-decoration: none;
+      transition: background 0.15s, border-color 0.15s;
+    }
+
+    .cta-primary {
+      background: var(--btn-active-bg);
+      border: 1.5px solid var(--btn-active-border);
+      color: #fff;
+    }
+
+    .cta-primary:hover { background: #5a4298; }
+
+    .cta-secondary {
+      background: transparent;
+      border: 1.5px solid var(--border-hi);
+      color: var(--text-dim);
+    }
+
+    .cta-secondary:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+
+    /* Footer */
+    footer {
+      padding: 1.25rem 2rem;
+      border-top: 1px solid var(--border);
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 1rem;
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1><a href="index.html">openMIP</a></h1>
+  <nav class="nav-tabs">
+    <a class="nav-tab active" href="about.html">About</a>
+    <a class="nav-tab" href="viewer.html">Viewer</a>
+    <!-- <a class="nav-tab" href="devices.html">Devices</a> -->
+    <a class="nav-tab" href="dev.html">Dev Log</a>
+  </nav>
+</header>
+
+<main>
+
+  <div>
+    <h1 class="page-hero">openMIP</h1>
+    <p class="page-subtitle">Open sourced molecular imprinting.</p>
+  </div>
+
+  <section>
+    <h2>What is openMIP?</h2>
+    <p>
+      openMIP is an open platform for developing, exploring, and visualising molecularly imprinted
+      polymers (MIPs) directly in the browser. It is designed to make MIP computational chemistry 
+      accessible without requiring specialised software installations or high-performance workstations.
+    </p>
+    <p>
+      Whether you are targeting a small-molecule for drug delivery or the epitope of
+      a biomarking protein, openMIP provides an interactive 3D environment
+      that runs entirely client-side — your data never leaves your machine.
+    </p>
+  </section>
+
+  <section>
+    <h2>Features</h2>
+    <div class="feature-grid">
+      <div class="feature-card">
+        <h3>Browser-native</h3>
+        <p>No installation, no server uploads. Everything runs inside your browser tab.</p>
+      </div>
+      <div class="feature-card">
+        <h3>PDB upload</h3>
+        <p>Drag-and-drop any <code>.pdb</code> file to visualise your own structures instantly.</p>
+      </div>
+      <div class="feature-card">
+        <h3>Smart rendering</h3>
+        <p>Stick representation for small molecules, cartoon for proteins.</p>
+      </div>
+      <div class="feature-card">
+        <h3>Structure repair</h3>
+        <p>Atom ordering is remapped on-the-fly when a PDB file is non-standard, without altering the source file.</p>
+      </div>
+      <div class="feature-card">
+        <h3>Graph Informed Predicitons</h3>
+        <p>Small molecules and eptiopes are examined and processed using our flow-matching algorithm to provide optimal interaction.</p>
+      </div>
+      <div class="feature-card">
+        <h3>GPU accelerated</h3>
+        <p>The discrete GPU is requested explicitly via WebGL power-preference hints for smooth interaction.</p>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h2>Technology</h2>
+    <p>
+      openMIP-web is a static single-page application; no framework, no backend. It is a Int8 quantized
+      version of openMIP, which is built as a flow-matching model in PyTorch. 
+      The molecular rendering layer is provided by 3Dmol.js, a WebGL-based library developed
+      at the University of Pittsburgh.
+    </p>
+  </section>
+
+  <section>
+    <h2>Get started</h2>
+    <p>
+      Upload a PDB file from the home page to open it directly in the viewer, or
+      explore the built-in demo molecules to get a feel for the interface.
+    </p>
+    <div class="cta-row">
+      <a class="cta-btn cta-primary" href="index.html">Upload a PDB</a>
+      <a class="cta-btn cta-secondary" href="viewer.html">Open Viewer</a>
+    </div>
+  </section>
+
+</main>
+
+<footer>
+  <span>openMIP</span>
+  <button id="theme-toggle" aria-label="Toggle theme"></button>
+</footer>
+
+<script src="src/theme.js"></script>
+</body>
+</html>

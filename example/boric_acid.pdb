@@ -1,0 +1,19 @@
+REMARK   Boric acid - B(OH)3
+REMARK   Generated structure
+REMARK   Molecular formula: BH3O3
+REMARK   Molecular weight: 61.83 g/mol
+HETATM    1  B   BOH A   1       0.000   0.000   0.000  1.00  0.00           B
+HETATM    2  O   BOH A   1       1.360   0.000   0.000  1.00  0.00           O
+HETATM    3  O   BOH A   1      -0.680   1.178   0.000  1.00  0.00           O
+HETATM    4  O   BOH A   1      -0.680  -1.178   0.000  1.00  0.00           O
+HETATM    5  H   BOH A   1       1.860   0.780   0.000  1.00  0.00           H
+HETATM    6  H   BOH A   1      -1.180   1.958   0.000  1.00  0.00           H
+HETATM    7  H   BOH A   1      -1.180  -1.958   0.000  1.00  0.00           H
+CONECT    1    2    3    4
+CONECT    2    1    5
+CONECT    3    1    6
+CONECT    4    1    7
+CONECT    5    2
+CONECT    6    3
+CONECT    7    4
+END

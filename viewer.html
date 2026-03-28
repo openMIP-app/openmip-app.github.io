@@ -1,0 +1,1812 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>openMIP</title>
+  <!-- Favicon (simple SVG to avoid 404) -->
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='0.9em' font-size='90'>🧬</text></svg>" />
+  <!-- Force the browser to use the high-performance (discrete) GPU for all
+       WebGL contexts created on this page, including the one 3Dmol.js makes.
+       This must run before any library creates a canvas context. -->
+  <script>
+    (function () {
+      const _orig = HTMLCanvasElement.prototype.getContext;
+      HTMLCanvasElement.prototype.getContext = function (type, attrs) {
+        if (type === 'webgl' || type === 'webgl2' || type === 'experimental-webgl') {
+          attrs = Object.assign({ powerPreference: 'high-performance', desynchronized: true }, attrs || {});
+        }
+        return _orig.call(this, type, attrs);
+      };
+    })();
+  </script>
+  <!-- Apply stored theme before first paint to prevent flash -->
+  <script>(function(){if(localStorage.getItem('openMIP-theme')==='light')document.documentElement.classList.add('light');})();</script>
+  <link rel="stylesheet" href="src/theme.css" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/3Dmol/2.4.0/3Dmol-min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/onnxruntime-web/dist/ort.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/js-yaml@4.1.0/dist/js-yaml.min.js"></script>
+  <script src="https://unpkg.com/@rdkit/rdkit/Code/MinimalLib/dist/RDKit_minimal.js"></script>
+  <script src="src/pdb.js"></script>
+  <script src="src/color.js"></script>
+  <script src="src/predict.js"></script>
+  <script src="src/identify.js"></script>
+  <script src="src/physics-scoring.js"></script>
+  <script src="src/diffmip-client.js"></script>
+  <style>
+    /* Push badge to the right */
+    .header-spacer { flex: 1; }
+
+    #mol-badge {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      background: var(--bg-element);
+      border: 1px solid var(--border);
+      padding: 0.2rem 0.6rem;
+      border-radius: 999px;
+    }
+
+    main {
+      display: flex;
+      flex: 1;
+      overflow: hidden;
+    }
+
+    footer {
+      padding: 0.6rem 1.5rem;
+      border-top: 1px solid var(--border);
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 1rem;
+      flex-shrink: 0;
+    }
+
+    /* ── Viewer ── */
+    #viewer-container {
+      flex: 1;
+      position: relative;
+      min-height: 600px;
+    }
+
+    #viewer {
+      width: 100%;
+      height: 100%;
+      position: absolute;
+      inset: 0;
+      will-change: transform;
+      transform: translateZ(0);
+    }
+
+    /* ── Sidebar ── */
+    #sidebar {
+      width: 260px;
+      min-width: 200px;
+      max-width: 600px;
+      background: var(--bg-panel);
+      border-left: 1px solid var(--border);
+      padding: 1.5rem 1rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+      overflow-y: auto;
+      transition: background 0.2s, border-color 0.2s;
+      flex-shrink: 0;
+    }
+
+    /* ── Resize Handle ── */
+    #resize-handle {
+      width: 5px;
+      cursor: ew-resize;
+      background: transparent;
+      position: relative;
+      flex-shrink: 0;
+      transition: background 0.2s;
+    }
+
+    #resize-handle:hover {
+      background: var(--accent);
+    }
+
+    #resize-handle::before {
+      content: '';
+      position: absolute;
+      left: -2px;
+      right: -2px;
+      top: 0;
+      bottom: 0;
+    }
+
+    .section-title {
+      font-size: 0.7rem;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      margin-bottom: 0.6rem;
+    }
+
+    .btn-group {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.4rem;
+    }
+
+    .btn {
+      padding: 0.45rem 0.5rem;
+      font-size: 0.8rem;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      background: var(--bg-element);
+      color: var(--text-dim);
+      cursor: pointer;
+      transition: background 0.15s, border-color 0.15s, color 0.15s;
+      text-align: center;
+    }
+
+    .btn:hover { background: var(--border); color: var(--text); }
+
+    .btn.active {
+      background: var(--btn-active-bg);
+      border-color: var(--btn-active-border);
+      color: #fff;
+    }
+
+    /* Upload tab */
+    .upload-tab {
+      width: 100%;
+      border-style: solid;
+      color: var(--text-muted);
+    }
+
+    .upload-tab.has-pdb {
+      border-style: solid;
+      color: var(--text-dim);
+    }
+
+    #viewer-file-input { display: none; }
+
+    /* Slider */
+    label.slider-label {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.78rem;
+      color: var(--text-dim);
+      margin-bottom: 0.3rem;
+    }
+
+    input[type=range] {
+      width: 100%;
+      accent-color: var(--accent);
+    }
+
+    /* Info box */
+    #info-box {
+      background: var(--bg-element);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 0.75rem;
+      font-size: 0.78rem;
+      color: var(--text-dim);
+      line-height: 1.7;
+      transition: background 0.2s, border-color 0.2s;
+    }
+
+    #info-box strong { color: var(--accent); }
+
+    /* Prediction panel */
+    #predict {
+      width: 100%;
+    }
+
+    #predict.running {
+      opacity: 0.6;
+      cursor: wait;
+    }
+
+    #predict-results {
+      display: none;
+      flex-direction: column;
+      gap: 0.35rem;
+      margin-top: 0.5rem;
+    }
+
+    #predict-results.visible { display: flex; }
+
+    .predict-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: var(--bg-element);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 0.4rem 0.65rem;
+      font-size: 0.78rem;
+    }
+
+    .predict-row-label { color: var(--text-dim); }
+
+    .predict-row-score {
+      font-weight: 600;
+      color: var(--accent);
+      font-variant-numeric: tabular-nums;
+    }
+
+    /* Collapsible sections */
+    .collapsible-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      cursor: pointer;
+      user-select: none;
+      margin-bottom: 0;
+    }
+
+    .collapsible-header .section-title {
+      margin-bottom: 0;
+    }
+
+    .collapsible-arrow {
+      font-size: 0.65rem;
+      color: var(--text-muted);
+      transition: transform 0.2s;
+      line-height: 1;
+    }
+
+    .collapsible-header.open .collapsible-arrow {
+      transform: rotate(180deg);
+    }
+
+    .collapsible-body {
+      display: none;
+      flex-direction: column;
+      gap: 0.4rem;
+      margin-top: 0.6rem;
+    }
+
+    .collapsible-body.open {
+      display: flex;
+    }
+
+    /* Identification section */
+    .identify-scroll {
+      max-height: 120px;
+      overflow-y: auto;
+      background: var(--bg-element);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      font-size: 0.78rem;
+      color: var(--text-dim);
+    }
+
+    .identify-scroll-item {
+      padding: 0.3rem 0.65rem;
+      cursor: pointer;
+      border-bottom: 1px solid var(--border);
+      transition: background 0.12s;
+    }
+
+    .identify-scroll-item:last-child {
+      border-bottom: none;
+    }
+
+    .identify-scroll-item:hover {
+      background: var(--border);
+      color: var(--text);
+    }
+
+    .identify-scroll-item.selected {
+      background: var(--btn-active-bg);
+      color: #fff;
+    }
+
+    #download-identify {
+      display: none;
+      width: 100%;
+    }
+
+    /* Toast notification */
+    #toast {
+      position: fixed;
+      top: 1.5rem;
+      left: 50%;
+      transform: translateX(-50%) translateY(-160%);
+      background: #2a1800;
+      border: 1px solid #b86c00;
+      color: #ffc84a;
+      border-radius: 8px;
+      padding: 0.6rem 1.1rem;
+      font-size: 0.82rem;
+      max-width: 500px;
+      width: max-content;
+      text-align: center;
+      z-index: 200;
+      pointer-events: none;
+      line-height: 1.5;
+      transition: transform 0.22s ease, opacity 0.22s ease;
+      opacity: 0;
+      user-select: text;
+      cursor: pointer;
+    }
+
+    #toast.visible {
+      transform: translateX(-50%) translateY(0);
+      opacity: 1;
+    }
+
+    #toast:hover {
+      border-color: #ffc84a;
+      background: #3a2400;
+    }
+
+    html.light #toast {
+      background: #fff3d6;
+      border-color: #c87c00;
+      color: #7a4800;
+    }
+
+    html.light #toast:hover {
+      border-color: #7a4800;
+      background: #ffe8ba;
+    }
+
+    #toast::after {
+      content: "(click to copy)";
+      font-size: 0.7rem;
+      opacity: 0.7;
+      font-style: italic;
+    }
+
+    /* ── diffMIP section ── */
+    .diffmip-input-group {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      margin-bottom: 0.8rem;
+    }
+
+    .diffmip-input-label {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      margin-bottom: 0.2rem;
+    }
+
+    .diffmip-input {
+      width: 100%;
+      padding: 0.4rem 0.6rem;
+      background: var(--bg-element);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      color: var(--text);
+      font-size: 0.85rem;
+    }
+
+    #diffmip-status {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      padding: 0.5rem;
+      background: var(--bg-element);
+      border-radius: 4px;
+      text-align: center;
+      margin-bottom: 0.8rem;
+      min-height: 1.5rem;
+      line-height: 1.3;
+      word-wrap: break-word;
+      overflow-wrap: break-word;
+      white-space: normal;
+      display: block;
+    }
+
+    #diffmip-results {
+      display: none;
+      margin-top: 0.8rem;
+      max-height: 300px;
+      overflow-y: auto;
+      background: var(--bg-element);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 0.6rem;
+    }
+
+    .diffmip-sample {
+      margin-bottom: 1rem;
+    }
+
+    .diffmip-sample:last-child {
+      margin-bottom: 0;
+    }
+
+    .diffmip-sample-header {
+      font-size: 0.7rem;
+      font-weight: 700;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 0.4rem;
+      padding-bottom: 0.3rem;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .diffmip-placement-row {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.35rem 0.4rem;
+      font-size: 0.78rem;
+      border-bottom: 1px solid var(--border);
+      transition: background 0.1s;
+      cursor: pointer;
+    }
+
+    .diffmip-placement-row:last-child {
+      border-bottom: none;
+    }
+
+    .diffmip-placement-row:hover {
+      background: var(--border);
+    }
+
+    .diffmip-placement-row.selected {
+      background: var(--btn-active-bg);
+    }
+
+    .diffmip-monomer-code {
+      font-weight: 700;
+      color: var(--accent);
+      min-width: 50px;
+    }
+
+    .diffmip-monomer-name {
+      flex: 1;
+      color: var(--text);
+    }
+
+    .diffmip-score {
+      font-size: 0.75rem;
+      font-family: monospace;
+      min-width: 100px;
+      text-align: right;
+    }
+
+    .diffmip-centroid {
+      font-size: 0.7rem;
+      font-family: monospace;
+      color: var(--text-muted);
+      min-width: 120px;
+    }
+
+    /* Status bar */
+    #status {
+      position: absolute;
+      bottom: 0.75rem;
+      left: 0.75rem;
+      font-size: 0.72rem;
+      color: var(--text-muted);
+      pointer-events: none;
+    }
+
+    /* H-bond legend — sits above the status bar, hidden until fit is loaded */
+    #hbond-legend {
+      display: none;
+      position: absolute;
+      bottom: 2.1rem;
+      left: 0.75rem;
+      align-items: center;
+      gap: 0.4rem;
+      font-size: 0.72rem;
+      color: var(--text-muted);
+      pointer-events: none;
+    }
+    #hbond-legend.visible { display: flex; }
+
+    /* π-π stacking legend — sits above the H-bond legend */
+    #pistacking-legend {
+      display: none;
+      position: absolute;
+      bottom: 3.6rem;
+      left: 0.75rem;
+      align-items: center;
+      gap: 0.4rem;
+      font-size: 0.72rem;
+      color: var(--text-muted);
+      pointer-events: none;
+    }
+    #pistacking-legend.visible { display: flex; }
+
+    /* Reset button */
+    #reset-btn {
+      width: 100%;
+      padding: 0.55rem;
+      background: var(--bg-element);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      color: var(--text);
+      font-size: 0.82rem;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+
+    #reset-btn:hover { background: var(--border); }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1><a href="index.html">openMIP</a></h1>
+  <nav class="nav-tabs">
+    <a class="nav-tab" href="about.html">About</a>
+    <a class="nav-tab active" href="viewer.html">Viewer</a>
+    <!-- <a class="nav-tab" href="devices.html">Devices</a> -->
+    <a class="nav-tab" href="dev.html">Dev Log</a>
+  </nav>
+  <div class="header-spacer"></div>
+  <span id="mol-badge">caffeine.pdb</span>
+</header>
+
+<main>
+  <div id="viewer-container">
+    <div id="viewer"></div>
+    <div id="status">Drag to rotate &nbsp;|&nbsp; Scroll to zoom &nbsp;|&nbsp; Right-drag to pan</div>
+    <div id="hbond-legend">
+      <svg width="30" height="8" aria-hidden="true">
+        <line x1="0" y1="4" x2="30" y2="4" stroke="#ffe066" stroke-width="2.5" stroke-dasharray="5,3" stroke-linecap="round"/>
+      </svg>
+      Hydrogen Bond
+    </div>
+    <div id="pistacking-legend">
+      <svg width="30" height="8" aria-hidden="true">
+        <line x1="0" y1="2" x2="30" y2="2" stroke="#00ff88" stroke-width="2" stroke-linecap="round"/>
+        <line x1="0" y1="6" x2="30" y2="6" stroke="#00ff88" stroke-width="2" stroke-linecap="round"/>
+      </svg>
+      π-π Stacking
+    </div>
+  </div>
+
+  <div id="resize-handle"></div>
+
+  <aside id="sidebar">
+
+    <!-- Molecule switch -->
+    <div>
+      <div class="section-title">Template</div>
+      <!-- Full-width upload tab sits above the built-in pair -->
+      <button class="btn upload-tab" id="upload-tab" data-mol="custom">&#x1F9EC; Upload PDB</button>
+      <input type="file" id="viewer-file-input" accept=".pdb" />
+      <div class="btn-group" id="mol-btn-group" style="margin-top:0.4rem;">
+        <button class="btn active" data-mol="caffeine">Caffeine</button>
+        <button class="btn" data-mol="cd20">CD20 Epitope</button>
+      </div>
+    </div>
+
+    <!-- Info -->
+    <div>
+      <div class="section-title">Info</div>
+      <div id="info-box"></div>
+    </div>
+
+    <!-- Identification (collapsible) -->
+    <div>
+      <div class="collapsible-header" id="identify-header">
+        <div class="section-title">Identification</div>
+        <span class="collapsible-arrow">&#9660;</span>
+      </div>
+      <div class="collapsible-body" id="identify-body">
+        <button class="btn upload-tab" id="identify-btn">Identify</button>
+        <div class="identify-scroll" id="identify-scroll" style="display:none;"></div>
+        <button class="btn upload-tab" id="prune-btn" style="display:none;">Prune</button>
+        <button class="btn upload-tab" id="download-identify">&#x2B07; Download PDB</button>
+
+        <!-- Separator -->
+        <!-- <div style="margin: 1rem 0; border-top: 1px solid var(--border);"></div> -->
+      </div>
+    </div>
+
+    <!-- Prediction (collapsible) -->
+    <div>
+      <div class="collapsible-header open" id="prediction-header">
+        <div class="section-title">Prediction</div>
+        <span class="collapsible-arrow">&#9660;</span>
+      </div>
+      <div class="collapsible-body open" id="prediction-body">
+        <!-- Quick Predict Button -->
+        <button class="btn upload-tab" id="predict" disabled>Predict Placements</button>
+
+        <!-- Separator -->
+        <!-- <div style="margin: 1rem 0; border-top: 1px solid var(--border);"></div> -->
+
+        <!-- Status -->
+        <div id="diffmip-status" style="font-weight: 500;">
+          Loading models...
+        </div>
+
+        <!-- Parameters -->
+        <div class="diffmip-input-group">
+          <label class="diffmip-input-label">Number of Monomers</label>
+          <input type="number" id="diffmip-num-monomers" class="diffmip-input" value="5" min="1" max="20" />
+        </div>
+
+        <div class="diffmip-input-group">
+          <label class="diffmip-input-label">Samples per Monomer</label>
+          <input type="number" id="diffmip-num-samples" class="diffmip-input" value="10" min="1" max="100" />
+        </div>
+
+        <div class="diffmip-input-group">
+          <label class="diffmip-input-label">Energy Cutoff (kcal/mol)</label>
+          <input type="number" id="diffmip-energy-cutoff" class="diffmip-input" value="-3" min="-15" max="25" step="0.5" />
+        </div>
+
+        <div class="diffmip-input-group" style="display:none;">
+          <label class="diffmip-input-label">Integration Steps</label>
+          <input type="number" id="diffmip-num-steps" class="diffmip-input" value="50" min="10" max="100" />
+        </div>
+
+        <!-- Advanced predict button (same functionality, for after adjusting parameters) -->
+        <button class="btn upload-tab" id="diffmip-predict" disabled style="display:none;">Predict with Custom Settings</button>
+
+        <!-- Results -->
+        <div id="diffmip-results"></div>
+
+        <!-- Clear button (shown after predictions) -->
+        <button class="btn upload-tab" id="clear-placements" style="display:none; margin-top: 0.8rem;">Clear Placements</button>
+
+        <!-- Legacy UI elements (hidden, kept for test mode) -->
+        <div id="predict-results" style="display:none;"></div>
+        <button class="btn upload-tab" id="download-fit" style="display:none;">&#x2B07; Download Fit PDB</button>
+      </div>
+    </div>
+
+    <!-- Representation (Collapsible) -->
+    <div>
+      <div class="collapsible-header" id="representation-header">
+        <div class="section-title">Representation</div>
+        <span class="collapsible-arrow">&#9660;</span>
+      </div>
+
+      <div class="collapsible-body" id="representation-body">
+        <div class="btn-group">
+          <button class="btn active" data-style="stick">Stick</button>
+          <button class="btn" data-style="cartoon">Cartoon</button>
+        </div>
+
+        <!-- Atom Radius (stick only) -->
+        <div id="radius-section">
+          <label class="slider-label">
+            <span>Atom Radius</span>
+            <span id="radius-val">0.20</span>
+          </label>
+          <input type="range" id="radius-slider" min="0.05" max="1.0" step="0.01" value="0.20" />
+        </div>
+
+        <!-- Bond Radius (stick only) -->
+        <div id="bond-section">
+          <label class="slider-label">
+            <span>Bond Radius</span>
+            <span id="bond-val">0.30</span>
+          </label>
+          <input type="range" id="bond-slider" min="0.05" max="0.50" step="0.01" value="0.30" />
+        </div>
+
+        <!-- Fit Color Mode -->
+        <div id="fit-color-mode-section">
+          <div class="section-title">Color Mode</div>
+          <div class="btn-group">
+            <button class="btn active" data-color-mode="rainbow">Rainbow</button>
+            <button class="btn" data-color-mode="atom-type">Atom Type</button>
+          </div>
+        </div>
+
+        <!-- Options -->
+        <div class="section-title">Options</div>
+        <div class="btn-group">
+          <button class="btn" id="toggle-labels">Labels Off</button>
+          <button class="btn" id="toggle-surface">Surface Off</button>
+          <!-- <button class="btn" id="fix-pdb" title="Reorder atoms within each residue to canonical N→CA→C→O→sidechain order, then reload">Fix PDB</button> -->
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Remap notice (hidden until needed) -->
+    <div id="remap-notice" style="display:none; background:var(--bg-element); border:1px solid var(--border); border-radius:8px; padding:0.65rem 0.75rem; font-size:0.75rem; color:var(--text-dim); line-height:1.55;">
+      Ribbon render may be incomplete — atom order remapped automatically.
+    </div>
+
+    <!-- Reset -->
+    <button id="reset-btn">Reset View</button>
+
+  </aside>
+</main>
+
+<script>
+// rawPdbText is declared at global scope so src/predict.js can read it.
+let rawPdbText = '';
+
+// ── Test flag ──────────────────────────────────────────────────────────────
+// When true, Predict button loads pre-made fit PDB files for testing.
+// When false, Predict button triggers diffMIP client-side inference.
+// Set to true only for testing pre-made placements.
+const TEST_CAFFEINE_FIT = false;
+
+(function () {
+  // ── Molecule catalogue ──────────────────────────────────────────
+  const MOLECULES = {
+    caffeine: {
+      file:     'example/caffeine.pdb',
+      fitFile:  'example/caffeine-fit.pdb',
+      badge:    'caffeine.pdb',
+      label:    'Caffeine',
+      formula:  'C₈H₁₀N₄O₂',
+      mw:       '194.19 g/mol',
+      atoms:    '24',
+      heavy:    '14',
+      defStyle: 'stick',
+    },
+    cd20: {
+      file:     'example/CD20-epitope.pdb',
+      fitFile:  'example/CD20-docked.pdb',
+      badge:    'CD20-epitope.pdb',
+      label:    'CD20 Epitope',
+      formula:  'protein fragment',
+      mw:       '—',
+      atoms:    '—',
+      heavy:    '—',
+      defStyle: 'cartoon',
+    },
+  };
+
+  // ── State ──────────────────────────────────────────────────────
+  let viewer, model;  // viewer will be made global for diffmip-client.js
+  let currentMol     = 'caffeine';
+  let currentStyle   = 'stick';
+  let atomRadius     = 0.20;
+  let bondRadius     = 0.30;
+  let labelsVisible  = false;
+  let surfaceVisible = false;
+  let surfaceObj     = null;
+  let labelObjs      = [];
+  let fitLoaded      = false;   // true after runFitAnimation succeeds
+  let hbondShapes    = [];      // 3Dmol shape refs for H-bond dashes
+  let fitPdbCache    = '';      // the raw fit PDB kept for download
+  let fmsDecodeMap   = null;    // lazy-loaded F-code → monomer name map
+  let templateResidues = new Set();  // residue names belonging to the template molecule
+  let fitResidueColors = new Map();  // map from residue name to pastel color
+  let fitColorMode = 'rainbow';  // 'rainbow' or 'atom-type'
+
+  // Pastel rainbow palette - soft, distinguishable colors
+  const PASTEL_RAINBOW = [
+    '#FFB3BA', // soft red
+    '#FFDFBA', // soft orange
+    '#FFFFBA', // soft yellow
+    '#BAFFC9', // soft green
+    '#BAE1FF', // soft blue
+    '#D4BAFF', // soft purple
+    '#FFB3E6', // soft pink
+    '#FFE6BA', // soft peach
+    '#C9FFE5', // soft mint
+    '#E0BAFF', // soft lavender
+  ];
+
+  // Helper to create a selector for template atoms
+  function templateSelector() {
+    if (templateResidues.size === 0) return { resn: 'UNL' };  // fallback
+    return { resn: Array.from(templateResidues) };
+  }
+
+  // Check if an atom belongs to the template (for filtering)
+  function isTemplateAtom(atom) {
+    return templateResidues.has(atom.resn);
+  }
+
+  // Assign pastel rainbow colors to fit molecules based on their order
+  function assignFitColors(fitResidues) {
+    fitResidueColors.clear();
+    const sortedResidues = Array.from(fitResidues).sort();
+    sortedResidues.forEach((resn, index) => {
+      const colorIndex = index % PASTEL_RAINBOW.length;
+      fitResidueColors.set(resn, PASTEL_RAINBOW[colorIndex]);
+    });
+  }
+
+  // Parse the flat "KEY: VALUE" YAML used for decodefms.yaml.
+  function parseSimpleYaml(text) {
+    const map = {};
+    for (const line of text.split('\n')) {
+      const m = line.match(/^([^:#\s][^:]*?):\s*(.+)$/);
+      if (m) map[m[1].trim()] = m[2].trim();
+    }
+    return map;
+  }
+
+  // Fetch prediction/decodefms.yaml once; return the cached map on repeat calls.
+  async function loadDecodeMap() {
+    if (fmsDecodeMap) return fmsDecodeMap;
+    try {
+      const r = await fetch('prediction/decodefms.yaml');
+      if (!r.ok) throw new Error('HTTP ' + r.status);
+      fmsDecodeMap = parseSimpleYaml(await r.text());
+    } catch (e) {
+      console.warn('openMIP: could not load decodefms.yaml —', e.message);
+      fmsDecodeMap = {};
+    }
+    return fmsDecodeMap;
+  }
+
+  // Decode an F-code residue name to its monomer name, falling back to the raw code.
+  function decodeFms(resn) {
+    return (fmsDecodeMap && fmsDecodeMap[resn]) || resn;
+  }
+
+  // ── Init viewer ────────────────────────────────────────────────
+  viewer = $3Dmol.createViewer('viewer', {
+    backgroundColor: '0x141414',
+    antialias: true,
+  });
+
+  // Make viewer globally accessible for diffmip-client.js
+  window.viewer = viewer;
+
+  // ── Info box ───────────────────────────────────────────────────
+  function updateInfo(key) {
+    const m = MOLECULES[key];
+    document.getElementById('mol-badge').textContent = m.badge;
+    document.getElementById('info-box').innerHTML =
+      `<strong>${m.label}</strong> <br>`+
+      `(${m.formula})<br>` +
+      `MW: ${m.mw}<br>` +
+      `Atoms: ${m.atoms} &nbsp;|&nbsp; Heavy: ${m.heavy}<br>` +
+      `Source: <em>${m.file}</em>`;
+  }
+
+  // ── Load molecule ──────────────────────────────────────────────
+  function loadMolecule(key) {
+    const m = MOLECULES[key];
+
+    viewer.removeAllModels();
+    viewer.removeAllSurfaces();
+    viewer.removeAllLabels();
+    hbondShapes.forEach(s => viewer.removeShape(s));
+    surfaceObj    = null;
+    labelObjs     = [];
+    hbondShapes   = [];
+    fitLoaded     = false;
+    fitPdbCache   = '';
+    labelsVisible = false;
+    surfaceVisible = false;
+    templateResidues.clear();
+    fitResidueColors.clear();
+    fitColorMode = 'rainbow';
+    document.querySelectorAll('[data-color-mode]').forEach(b => b.classList.remove('active'));
+    const rainbowBtn = document.querySelector('[data-color-mode="rainbow"]');
+    if (rainbowBtn) rainbowBtn.classList.add('active');
+    document.getElementById('toggle-labels').textContent  = 'Labels Off';
+    document.getElementById('toggle-labels').classList.remove('active');
+    document.getElementById('toggle-surface').textContent = 'Surface Off';
+    document.getElementById('toggle-surface').classList.remove('active');
+    document.getElementById('download-fit').style.display = 'none';
+    document.getElementById('hbond-legend').classList.remove('visible');
+    document.getElementById('pistacking-legend').classList.remove('visible');
+    const _pr = document.getElementById('predict-results');
+    _pr.classList.remove('visible');
+    _pr.innerHTML = '';
+
+    // Clear diffMIP placements and H-bonds when loading a new molecule
+    if (typeof clearPlacements === 'function') {
+      clearPlacements();
+    }
+
+    currentStyle = m.defStyle;
+    document.querySelectorAll('[data-style]').forEach(b => {
+      b.classList.toggle('active', b.dataset.style === currentStyle);
+    });
+    toggleSliders();
+
+    // Loading modal removed - using console logs only
+    console.log('[loadMolecule] Loading:', m.badge);
+
+    document.getElementById('remap-notice').style.display = 'none';
+
+    console.log('[loadMolecule] Fetching:', m.file);
+    fetch(m.file)
+      .then(r => {
+        if (!r.ok) throw new Error('File not found: ' + r.status);
+        console.log('[loadMolecule] Fetch successful, parsing data...');
+        return r.text();
+      })
+      .then(data => {
+        console.log('[loadMolecule] Data received, length:', data.length);
+        rawPdbText = data;   // cache for Fix PDB / auto-remap
+        Object.assign(MOLECULES[key], computePDBStats(rawPdbText));
+        model = viewer.addModel(data, 'pdb');
+        console.log('[loadMolecule] Model added to viewer');
+        updateInfo(key);
+        applyStyle();
+        viewer.zoomTo();
+        viewer.render();
+        console.log('[loadMolecule] Viewer rendered, molecule loaded');
+
+        // Auto-detect broken cartoon: for protein files in cartoon mode,
+        // check that the model contains CA atoms.  If none are found the
+        // backbone trace will be silent — remap automatically.
+        if (currentStyle === 'cartoon') {
+          const caAtoms = model.selectedAtoms({ atom: 'CA' });
+          if (caAtoms.length === 0) {
+            console.warn('openMIP: no CA atoms found — remapping PDB atom order automatically');
+            applyRemappedPDB(/* showNotice= */ true);
+          }
+        }
+      })
+      .catch(err => {
+        console.error('[loadMolecule] Error loading molecule:', err);
+        alert('Error loading molecule: ' + err.message);
+      });
+  }
+
+  // ── Style application ──────────────────────────────────────────
+  function applyStyle() {
+    // Clear all styles (target and monomers)
+    viewer.setStyle({}, {});
+
+    if (currentStyle === 'stick') {
+      if (fitLoaded) {
+        if (fitColorMode === 'rainbow') {
+          // Apply pastel rainbow colors to each fit molecule
+          fitResidueColors.forEach((color, resn) => {
+            viewer.setStyle({ resn: resn }, { stick:  { radius: bondRadius, color: color },
+                                              sphere: { radius: atomRadius, color: color } });
+          });
+        } else {
+          // Apply Jmol atom-type coloring to fit molecules
+          const fitResidues = Array.from(fitResidueColors.keys());
+          viewer.setStyle({ resn: fitResidues }, { stick:  { radius: bondRadius, colorscheme: 'Jmol' },
+                                                    sphere: { radius: atomRadius, colorscheme: 'Jmol' } });
+        }
+        // Then ghost the template atoms
+        if (fitColorMode === 'rainbow') {
+          viewer.setStyle(templateSelector(), { stick:  { radius: bondRadius, opacity: 0.30, colorfunc: buildPastelRainbow(model) },
+                                                sphere: { radius: atomRadius, opacity: 0.30, colorfunc: buildPastelRainbow(model) } });
+        } else {
+          viewer.setStyle(templateSelector(), { stick:  { radius: bondRadius, opacity: 0.30, colorscheme: 'Jmol' },
+                                                sphere: { radius: atomRadius, opacity: 0.30, colorscheme: 'Jmol' } });
+        }
+      } else {
+        // No fit: check if diffMIP placements exist
+        const hasDiffMIPPlacements = (typeof placementShapes !== 'undefined' && placementShapes.length > 0);
+
+        if (fitColorMode === 'rainbow') {
+          if (hasDiffMIPPlacements) {
+            // Rainbow mode with diffMIP: apply to target only, then restore monomer colors
+            viewer.setStyle({model: 0}, { stick:   { radius: bondRadius, colorfunc: buildPastelRainbow(model) },
+                                          sphere:  { radius: atomRadius, colorfunc: buildPastelRainbow(model) } });
+
+            // Restore original assigned colors for diffMIP monomers (inline to use current radii)
+            if (typeof placementShapes !== 'undefined' && typeof placementLabels !== 'undefined') {
+              placementLabels.forEach((labelData, idx) => {
+                if (idx < placementShapes.length) {
+                  const monomerModel = placementShapes[idx];
+                  const color = labelData.color;
+                  try {
+                    monomerModel.setStyle({}, {
+                      stick:  { radius: bondRadius, color: color },
+                      sphere: { radius: atomRadius, color: color }
+                    });
+                  } catch (e) {
+                    console.warn(`Error restoring monomer ${idx} style:`, e);
+                  }
+                }
+              });
+            }
+          } else {
+            // No placements: apply to all models
+            viewer.setStyle({}, { stick:   { radius: bondRadius, colorfunc: buildPastelRainbow(model) },
+                                  sphere:  { radius: atomRadius, colorfunc: buildPastelRainbow(model) } });
+          }
+        } else {
+          // Atom type mode: apply to all models (target and diffMIP placements)
+          viewer.setStyle({}, { stick:   { radius: bondRadius, colorscheme: 'Jmol' },
+                                sphere:  { radius: atomRadius, colorscheme: 'Jmol' } });
+        }
+      }
+    } else if (currentStyle === 'cartoon') {
+      if (fitLoaded) {
+        if (fitColorMode === 'rainbow') {
+          // Apply pastel rainbow colors to each fit molecule
+          fitResidueColors.forEach((color, resn) => {
+            viewer.setStyle({ resn: resn }, { stick:  { radius: bondRadius, color: color },
+                                              sphere: { radius: atomRadius, color: color } });
+          });
+        } else {
+          // Apply Jmol atom-type coloring to fit molecules
+          const fitResidues = Array.from(fitResidueColors.keys());
+          viewer.setStyle({ resn: fitResidues }, { stick:  { radius: bondRadius, colorscheme: 'Jmol' },
+                                                    sphere: { radius: atomRadius, colorscheme: 'Jmol' } });
+        }
+        viewer.setStyle(templateSelector(), { cartoon: { colorfunc: buildPastelRainbow(model), thickness: 0.4 } });
+      } else {
+        // No fit: apply cartoon to model 0 only (target, not diffMIP placements)
+        if (fitColorMode === 'rainbow') {
+          viewer.setStyle({model: 0}, { cartoon: { colorfunc: buildPastelRainbow(model), thickness: 0.4 } });
+
+          // Restore original assigned colors for diffMIP monomers if they exist (inline to use current radii)
+          const hasDiffMIPPlacements = (typeof placementShapes !== 'undefined' && placementShapes.length > 0);
+          if (hasDiffMIPPlacements && typeof placementLabels !== 'undefined') {
+            placementLabels.forEach((labelData, idx) => {
+              if (idx < placementShapes.length) {
+                const monomerModel = placementShapes[idx];
+                const color = labelData.color;
+                try {
+                  monomerModel.setStyle({}, {
+                    stick:  { radius: bondRadius, color: color },
+                    sphere: { radius: atomRadius, color: color }
+                  });
+                } catch (e) {
+                  console.warn(`Error restoring monomer ${idx} style:`, e);
+                }
+              }
+            });
+          }
+        } else {
+          viewer.setStyle({model: 0}, { cartoon: { colorscheme: 'Jmol', thickness: 0.4 } });
+        }
+      }
+    }
+
+    if (surfaceVisible) {
+      if (surfaceObj !== null) viewer.removeSurface(surfaceObj);
+      surfaceObj = null;
+      // addSurface is async — capture the resolved surface ID so removeSurface works
+      // When fit is loaded restrict the surface to the template molecule only.
+      // For diffMIP mode, always restrict to model 0 (the target, not placed monomers)
+      const surfaceSel = fitLoaded ? templateSelector() : {model: 0};
+      viewer.addSurface($3Dmol.SurfaceType.VDW, { opacity: 0.45, color: 'white' }, surfaceSel)
+            .then(id => { surfaceObj = id; });
+    }
+
+    viewer.render();
+  }
+
+  // ── PDB remap helpers ──────────────────────────────────────────
+
+  // Apply remapPDB to the cached raw text, reload the model, and re-render.
+  // showNotice: show the sidebar notice explaining an auto-remap occurred.
+  function applyRemappedPDB(showNotice) {
+    if (!rawPdbText) return;
+    const fixed = remapPDB(rawPdbText);
+    rawPdbText = fixed;            // update cache so Fix PDB is idempotent
+
+    viewer.removeAllModels();
+    viewer.removeAllSurfaces();
+    viewer.removeAllLabels();
+    hbondShapes.forEach(s => viewer.removeShape(s));
+    surfaceObj    = null;
+    labelObjs     = [];
+    hbondShapes   = [];
+    fitLoaded     = false;
+    labelsVisible = false;
+    surfaceVisible = false;
+    templateResidues.clear();
+    fitResidueColors.clear();
+    fitColorMode = 'rainbow';
+    document.querySelectorAll('[data-color-mode]').forEach(b => b.classList.remove('active'));
+    const rainbowBtn = document.querySelector('[data-color-mode="rainbow"]');
+    if (rainbowBtn) rainbowBtn.classList.add('active');
+    document.getElementById('toggle-labels').textContent  = 'Labels Off';
+    document.getElementById('toggle-labels').classList.remove('active');
+    document.getElementById('toggle-surface').textContent = 'Surface Off';
+    document.getElementById('toggle-surface').classList.remove('active');
+
+    // Clear diffMIP placements and H-bonds when remapping PDB
+    if (typeof clearPlacements === 'function') {
+      clearPlacements();
+    }
+
+    model = viewer.addModel(fixed, 'pdb');
+    applyStyle();
+    viewer.zoomTo();
+    viewer.render();
+
+    if (showNotice) {
+      document.getElementById('remap-notice').style.display = '';
+    }
+  }
+
+  // ── Show/hide sliders based on style ──────────────────────────
+  function toggleSliders() {
+    const show = currentStyle === 'stick';   // sliders only apply to stick
+    document.getElementById('radius-section').style.display = show ? '' : 'none';
+    document.getElementById('bond-section').style.display   = show ? '' : 'none';
+  }
+
+  // ── Label helpers ──────────────────────────────────────────────
+
+  // Place one label at the centroid of a set of atoms.
+  function centroid(atoms) {
+    let x = 0, y = 0, z = 0;
+    atoms.forEach(a => { x += a.x; y += a.y; z += a.z; });
+    return { x: x / atoms.length, y: y / atoms.length, z: z / atoms.length };
+  }
+
+  // Shared label style.
+  function labelStyle(pos, text) {
+    return viewer.addLabel(text, {
+      position:        pos,
+      backgroundColor: 'rgba(139,111,212,0.75)',   // pastel purple
+      fontColor:       '#ffffff',
+      fontSize:        12,
+      borderRadius:    4,
+      padding:         3,
+      showBackground:  true,
+      inFront:         true,
+    });
+  }
+
+  // Build labels appropriate for the current molecule.
+  function addLabels() {
+    const atoms = model.selectedAtoms({});
+
+    if (fitLoaded) {
+      // Label the ghosted template at its centroid.
+      const templateAtoms = model.selectedAtoms(templateSelector());
+      if (templateAtoms.length > 0) {
+        labelObjs.push(labelStyle(centroid(templateAtoms), 'Template'));
+      }
+      // Label each fit residue with its decoded monomer name (group by resn + resi).
+      const residueMap = {};
+      atoms.forEach(a => {
+        if (templateResidues.has(a.resn)) return;  // skip template atoms
+        const key = `${a.resn}:${a.resi}`;
+        if (!residueMap[key]) residueMap[key] = { atoms: [], resn: a.resn, resi: a.resi };
+        residueMap[key].atoms.push(a);
+      });
+      Object.values(residueMap).forEach(res => {
+        const name = decodeFms(res.resn);
+        labelObjs.push(labelStyle(centroid(res.atoms), name));
+      });
+
+    } else if (currentMol === 'caffeine') {
+      // One label at the molecular centroid.
+      labelObjs.push(labelStyle(centroid(atoms), 'Caffeine'));
+
+    } else {
+      // One label per unique residue, positioned at the residue centroid.
+      // Key: chain + residue sequence number to handle duplicate res names.
+      const residueMap = {};
+      atoms.forEach(a => {
+        const key = `${a.chain}:${a.resi}`;
+        if (!residueMap[key]) residueMap[key] = { atoms: [], resn: a.resn, resi: a.resi };
+        residueMap[key].atoms.push(a);
+      });
+
+      Object.values(residueMap).forEach(res => {
+        const pos  = centroid(res.atoms);
+        const text = `${res.resn} ${res.resi}`;
+        labelObjs.push(labelStyle(pos, text));
+      });
+    }
+  }
+
+  // ── Molecule switcher (built-in molecules only) ────────────────
+  // The upload tab (#upload-tab) is excluded here — it has its own listener.
+  document.querySelectorAll('#mol-btn-group [data-mol]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      if (btn.dataset.mol === currentMol) return;
+
+      // Show toast for protein structures
+      if (btn.dataset.mol === 'cd20') {
+        showToast('Only small molecules are supported at the moment. Try our caffeine example or your own small molecule.', 5000);
+      }
+
+      document.querySelectorAll('[data-mol]').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      currentMol = btn.dataset.mol;
+      loadMolecule(currentMol);
+    });
+  });
+
+  // ── Representation buttons ─────────────────────────────────────
+  document.querySelectorAll('[data-style]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('[data-style]').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      currentStyle = btn.dataset.style;
+      toggleSliders();
+      applyStyle();
+    });
+  });
+
+  // ── Fit color mode buttons ─────────────────────────────────────
+  document.querySelectorAll('[data-color-mode]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('[data-color-mode]').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      fitColorMode = btn.dataset.colorMode;
+      applyStyle();
+    });
+  });
+
+  // ── Debounce helper ────────────────────────────────────────────
+  function debounce(fn, ms) {
+    let t;
+    return (...args) => { clearTimeout(t); t = setTimeout(() => fn(...args), ms); };
+  }
+  const debouncedApplyStyle = debounce(applyStyle, 120);
+
+  // ── Sliders ────────────────────────────────────────────────────
+  document.getElementById('radius-slider').addEventListener('input', e => {
+    atomRadius = parseFloat(e.target.value);
+    document.getElementById('radius-val').textContent = atomRadius.toFixed(2);
+    if (currentStyle === 'stick') debouncedApplyStyle();
+  });
+
+  document.getElementById('bond-slider').addEventListener('input', e => {
+    bondRadius = parseFloat(e.target.value);
+    document.getElementById('bond-val').textContent = bondRadius.toFixed(2);
+    if (currentStyle === 'stick') debouncedApplyStyle();
+  });
+
+  // ── Theme sync — keep 3Dmol background in step with the universal toggle ──
+  const VIEWER_BG = { dark: '0x141414', light: '0xf4f0fb' };
+  // Set initial background to match whatever theme is already active.
+  viewer.setBackgroundColor(
+    document.documentElement.classList.contains('light') ? VIEWER_BG.light : VIEWER_BG.dark
+  );
+  document.addEventListener('openMIP:themeChange', e => {
+    viewer.setBackgroundColor(VIEWER_BG[e.detail.theme] || VIEWER_BG.dark);
+    viewer.render();
+  });
+
+  // ── Label toggle ───────────────────────────────────────────────
+  document.getElementById('toggle-labels').addEventListener('click', function () {
+    labelsVisible = !labelsVisible;
+    this.textContent = labelsVisible ? 'Labels On' : 'Labels Off';
+    this.classList.toggle('active', labelsVisible);
+
+    if (labelsVisible) {
+      addLabels();
+      // Also show diffMIP labels if they exist
+      if (typeof showDiffMIPLabels !== 'undefined' && typeof placementLabels !== 'undefined' && placementLabels.length > 0) {
+        showDiffMIPLabels();
+      }
+    } else {
+      labelObjs.forEach(l => viewer.removeLabel(l));
+      labelObjs = [];
+      // Also hide diffMIP labels if they exist
+      if (typeof hideDiffMIPLabels !== 'undefined' && typeof placementLabels !== 'undefined' && placementLabels.length > 0) {
+        hideDiffMIPLabels();
+      }
+    }
+    viewer.render();
+  });
+
+  // ── Surface toggle ─────────────────────────────────────────────
+  document.getElementById('toggle-surface').addEventListener('click', function () {
+    surfaceVisible = !surfaceVisible;
+    this.textContent = surfaceVisible ? 'Surface On' : 'Surface Off';
+    this.classList.toggle('active', surfaceVisible);
+
+    if (surfaceVisible) {
+      // addSurface is async — capture the resolved surface ID so removeSurface works
+      // When fit is loaded restrict the surface to the template molecule only.
+      const surfaceSel = fitLoaded ? templateSelector() : {};
+      viewer.addSurface($3Dmol.SurfaceType.VDW, { opacity: 0.45, color: 'white' }, surfaceSel)
+            .then(id => { surfaceObj = id; });
+    } else {
+      if (surfaceObj !== null) viewer.removeSurface(surfaceObj);
+      surfaceObj = null;
+    }
+    viewer.render();
+  });
+
+  // ── Reset ──────────────────────────────────────────────────────
+  document.getElementById('reset-btn').addEventListener('click', () => {
+    viewer.zoomTo();
+    viewer.render();
+  });
+
+  // ── Custom PDB helpers ─────────────────────────────────────────
+  const uploadTab      = document.getElementById('upload-tab');
+  const viewerFileInput = document.getElementById('viewer-file-input');
+
+  // Helper: Check if the first two residues are amino acids
+  function hasAminoAcidResidues(pdbText) {
+    const standardAminoAcids = new Set([
+      'ALA', 'ARG', 'ASN', 'ASP', 'CYS', 'GLN', 'GLU', 'GLY', 'HIS', 'ILE',
+      'LEU', 'LYS', 'MET', 'PHE', 'PRO', 'SER', 'THR', 'TRP', 'TYR', 'VAL'
+    ]);
+
+    const residues = [];
+    const lines = pdbText.split('\n');
+
+    for (const line of lines) {
+      if (line.startsWith('ATOM') || line.startsWith('HETATM')) {
+        // Residue name is in columns 18-20 (0-indexed: 17-20)
+        const resName = line.substring(17, 20).trim();
+        if (!residues.includes(resName)) {
+          residues.push(resName);
+        }
+        // Stop after finding 2 unique residues
+        if (residues.length >= 2) break;
+      }
+    }
+
+    // Check if at least the first two residues are amino acids
+    if (residues.length >= 2) {
+      return standardAminoAcids.has(residues[0]) && standardAminoAcids.has(residues[1]);
+    }
+    return false;
+  }
+
+  // Register (or replace) a custom PDB from any source and make it active.
+  function registerCustomPDB(name, text) {
+    const isProtein = hasAminoAcidResidues(text);
+    const key = 'custom';
+
+    MOLECULES[key] = {
+      file:     null,
+      pdbText:  text,
+      badge:    name,
+      label:    name.replace(/\.pdb$/i, ''),
+      formula:  isProtein ? 'protein' : 'small molecule',
+      mw:       '—',
+      atoms:    '—',
+      heavy:    '—',
+      defStyle: isProtein ? 'cartoon' : 'stick',
+    };
+
+    // Show toast for protein structures
+    if (isProtein) {
+      showToast('Only small molecules are supported at the moment. Try our caffeine example or your own small molecule.', 5000);
+    }
+
+    // Update the upload tab to show the filename and mark it as loaded
+    uploadTab.textContent = MOLECULES[key].label;
+    uploadTab.classList.add('has-pdb');
+
+    // Activate the upload tab; deactivate all others
+    document.querySelectorAll('[data-mol]').forEach(b => b.classList.remove('active'));
+    uploadTab.classList.add('active');
+    currentMol = key;
+    loadMolecule(key);
+  }
+
+  // Upload tab click: if no PDB loaded yet or already the active mol → open picker;
+  // otherwise just switch to it.
+  uploadTab.addEventListener('click', () => {
+    if (!uploadTab.classList.contains('has-pdb') || currentMol === 'custom') {
+      viewerFileInput.value = '';   // allow re-picking the same file
+      viewerFileInput.click();
+    } else {
+      document.querySelectorAll('[data-mol]').forEach(b => b.classList.remove('active'));
+      uploadTab.classList.add('active');
+      currentMol = 'custom';
+      loadMolecule('custom');
+    }
+  });
+
+  // File selected via the viewer's own picker
+  viewerFileInput.addEventListener('change', () => {
+    const file = viewerFileInput.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = e => registerCustomPDB(file.name, e.target.result);
+    reader.readAsText(file);
+  });
+
+  // ── Custom PDB from landing-page upload (sessionStorage) ───────
+  // index.html stores { name, text } in sessionStorage under 'customPdb'
+  // before redirecting here.  We consume it via registerCustomPDB.
+  (function injectCustomPdb() {
+    let stored;
+    try { stored = sessionStorage.getItem('customPdb'); } catch (_) {}
+    if (!stored) return;
+    const { name, text } = JSON.parse(stored);
+    sessionStorage.removeItem('customPdb');
+    registerCustomPDB(name, text);
+  })();
+
+  // ── loadMolecule — extended to support inline pdbText ──────────
+  // Patch loadMolecule to handle entries that carry their text inline
+  // (custom uploads) without fetching a file URL.
+  const _origLoadMolecule = loadMolecule;
+  loadMolecule = function (key) {
+    const m = MOLECULES[key];
+    if (!m || m.file !== null) { _origLoadMolecule(key); return; }
+
+    // Inline path: skip fetch, feed pdbText directly
+    viewer.removeAllModels();
+    viewer.removeAllSurfaces();
+    viewer.removeAllLabels();
+    hbondShapes.forEach(s => viewer.removeShape(s));
+    surfaceObj = null; labelObjs = []; hbondShapes = [];
+    fitLoaded = false; fitPdbCache = '';
+    labelsVisible = false; surfaceVisible = false;
+    templateResidues.clear();
+    fitResidueColors.clear();
+    fitColorMode = 'rainbow';
+    document.querySelectorAll('[data-color-mode]').forEach(b => b.classList.remove('active'));
+    const rainbowBtn = document.querySelector('[data-color-mode="rainbow"]');
+    if (rainbowBtn) rainbowBtn.classList.add('active');
+    document.getElementById('toggle-labels').textContent  = 'Labels Off';
+    document.getElementById('toggle-labels').classList.remove('active');
+    document.getElementById('toggle-surface').textContent = 'Surface Off';
+    document.getElementById('toggle-surface').classList.remove('active');
+    document.getElementById('download-fit').style.display = 'none';
+    document.getElementById('hbond-legend').classList.remove('visible');
+    document.getElementById('pistacking-legend').classList.remove('visible');
+    const _pr = document.getElementById('predict-results');
+    _pr.classList.remove('visible');
+    _pr.innerHTML = '';
+
+    // Clear diffMIP placements and H-bonds when loading a new molecule
+    if (typeof clearPlacements === 'function') {
+      clearPlacements();
+    }
+
+    currentStyle = m.defStyle;
+    document.querySelectorAll('[data-style]').forEach(b => {
+      b.classList.toggle('active', b.dataset.style === currentStyle);
+    });
+    toggleSliders();
+
+    document.getElementById('remap-notice').style.display = 'none';
+
+    rawPdbText = m.pdbText;
+    Object.assign(MOLECULES[key], computePDBStats(rawPdbText));
+    model = viewer.addModel(m.pdbText, 'pdb');
+    updateInfo(key);
+    applyStyle();
+    viewer.zoomTo();
+    viewer.render();
+
+    if (currentStyle === 'cartoon') {
+      const caAtoms = model.selectedAtoms({ atom: 'CA' });
+      if (caAtoms.length === 0) {
+        console.warn('openMIP: no CA atoms found — remapping PDB atom order automatically');
+        applyRemappedPDB(true);
+      }
+    }
+  };
+
+  // ── H-bond helpers ─────────────────────────────────────────────────────────
+
+  // Return all N and O heavy atoms from a PDB string.
+  function parseHBondAtoms(pdbText) {
+    const atoms = [];
+    for (const line of pdbText.split('\n')) {
+      const rec = line.substring(0, 6).trim();
+      if (rec !== 'ATOM' && rec !== 'HETATM') continue;
+      const rawElem = line.length > 76 ? line.substring(76, 78).trim() : '';
+      const elem    = (rawElem || line.substring(12, 16).trim().replace(/[^A-Za-z]/g, '')[0] || 'C')
+                        .toUpperCase();
+      if (elem !== 'N' && elem !== 'O') continue;
+      atoms.push({
+        x:    parseFloat(line.substring(30, 38)),
+        y:    parseFloat(line.substring(38, 46)),
+        z:    parseFloat(line.substring(46, 54)),
+        resn: line.substring(17, 20).trim(),
+        elem,
+      });
+    }
+    return atoms;
+  }
+
+  // Draw a dashed line between two points; returns array of shape refs.
+  // Uses thin cylinders alternating with gaps to fake a dash pattern.
+  function drawHBondDash(p1, p2) {
+    const N_DASHES = 5;
+    const dx = p2.x - p1.x, dy = p2.y - p1.y, dz = p2.z - p1.z;
+    const len = Math.sqrt(dx * dx + dy * dy + dz * dz);
+    const ux = dx / len, uy = dy / len, uz = dz / len;
+    const segLen = len / (2 * N_DASHES - 1);   // dash + gap unit
+    const shapes = [];
+    for (let i = 0; i < N_DASHES; i++) {
+      const t0 = 2 * i * segLen;
+      const t1 = (2 * i + 1) * segLen;
+      shapes.push(viewer.addCylinder({
+        start:   { x: p1.x + ux * t0, y: p1.y + uy * t0, z: p1.z + uz * t0 },
+        end:     { x: p1.x + ux * t1, y: p1.y + uy * t1, z: p1.z + uz * t1 },
+        radius:  0.07,
+        color:   '#ffe066',   // warm yellow
+        fromCap: 2,
+        toCap:   2,
+      }));
+    }
+    return shapes;
+  }
+
+  // Find N/O pairs between templatePdb and fitPdb within cutoff Å and draw dashes.
+  // Stores shape refs in hbondShapes for later cleanup.
+  function visualizeHBonds(templatePdb, fitPdb, cutoff) {
+    cutoff = cutoff || 3.5;
+    const tAtoms = parseHBondAtoms(templatePdb);
+    const fAtoms = parseHBondAtoms(fitPdb);
+    let count = 0;
+    for (const ta of tAtoms) {
+      for (const fa of fAtoms) {
+        const dx = ta.x - fa.x, dy = ta.y - fa.y, dz = ta.z - fa.z;
+        const dist = Math.sqrt(dx * dx + dy * dy + dz * dz);
+        if (dist < cutoff) {
+          hbondShapes.push(...drawHBondDash(ta, fa));
+          count++;
+        }
+      }
+    }
+    console.log('openMIP: ' + count + ' H-bond(s) detected at ' + cutoff + ' Å cutoff');
+  }
+
+  // ── Fit loader (TEST_CAFFEINE_FIT path) ───────────────────────────────────
+  // Loads the fit PDB file into the viewer alongside the ghosted
+  // template molecule.  No animation — just a static overlay.
+  async function runFitAnimation(fitFilePath) {
+    const btn = document.getElementById('predict');
+    btn.textContent = 'Predicting…';
+    btn.classList.add('running');
+    btn.disabled = true;
+
+    await Promise.all([
+      new Promise(r => setTimeout(r, 900)),
+      loadDecodeMap(),   // fetch decode map in parallel with the artificial delay
+    ]);
+
+    try {
+      // Snapshot template PDB before anything is cleared.
+      const templatePdb  = rawPdbText;
+      const templateLines = templatePdb.split('\n')
+        .filter(l => /^(ATOM  |HETATM)/.test(l));
+
+      // Extract unique residue names from the template
+      templateResidues.clear();
+      for (const line of templateLines) {
+        const resn = line.substring(17, 20).trim();
+        if (resn) templateResidues.add(resn);
+      }
+
+      const response = await fetch(fitFilePath);
+      if (!response.ok) throw new Error(fitFilePath + ' not found (' + response.status + ')');
+      const fitPdb = await response.text();
+
+      const fitLines = fitPdb.split('\n')
+        .filter(l => /^(ATOM  |HETATM)/.test(l));
+
+      if (fitLines.length === 0) throw new Error('No atoms parsed from ' + fitFilePath);
+
+      // Extract unique residue names from the fit (excluding template residues)
+      const fitResidues = new Set();
+      for (const line of fitLines) {
+        const resn = line.substring(17, 20).trim();
+        if (resn && !templateResidues.has(resn)) {
+          fitResidues.add(resn);
+        }
+      }
+
+      // Assign pastel rainbow colors to fit molecules
+      assignFitColors(fitResidues);
+
+      // Replace viewer contents with a single combined model.
+      viewer.removeAllModels();
+      viewer.removeAllSurfaces();
+      viewer.removeAllLabels();
+      hbondShapes.forEach(s => viewer.removeShape(s));
+      surfaceObj = null; labelObjs = []; hbondShapes = [];
+
+      const combinedPdb = [...templateLines, ...fitLines, 'END'].join('\n');
+      model = viewer.addModel(combinedPdb, 'pdb');
+
+      // Mark fit as loaded so applyStyle knows to use split rendering with ghosted template
+      fitLoaded = true;
+
+      // Apply the current style (handles cartoon vs stick + ghosting automatically)
+      applyStyle();
+
+      // Draw H-bond dashes between template and fit N/O atoms within 3.5 Å.
+      visualizeHBonds(templatePdb, fitPdb);
+
+      viewer.zoomTo();
+      viewer.render();
+
+      rawPdbText  = fitPdb;
+      fitPdbCache = fitPdb;
+
+      document.getElementById('toggle-labels').textContent  = 'Labels Off';
+      document.getElementById('toggle-labels').classList.remove('active');
+      document.getElementById('toggle-surface').textContent = 'Surface Off';
+      document.getElementById('toggle-surface').classList.remove('active');
+      document.getElementById('download-fit').style.display = '';
+      document.getElementById('hbond-legend').classList.add('visible');
+
+      // Collect unique F-codes from the fit PDB and decode them for the result rows.
+      const fitCodes = [...new Set(
+        fitPdb.split('\n')
+          .filter(l => /^(ATOM  |HETATM)/.test(l))
+          .map(l => l.substring(17, 20).trim())
+          .filter(Boolean)
+      )];
+      const fitRows = fitCodes.map(code => ({
+        label: decodeFms(code) + ' (' + code + ')',
+        score: '—',
+      }));
+
+      // Get the current molecule's label for the template name
+      const templateName = MOLECULES[currentMol] ? MOLECULES[currentMol].label : 'template';
+
+      showPredictResults([
+        ...fitRows,
+        { label: templateName + ' (template)', score: '—' },
+      ]);
+
+    } catch (err) {
+      console.error('openMIP fit error:', err);
+      showPredictResults([{ label: 'Error: ' + err.message, score: '—' }]);
+    } finally {
+      btn.textContent = 'Predict';
+      btn.classList.remove('running');
+      btn.disabled = false;
+    }
+  }
+
+  // ── Predict button ─────────────────────────────────────────────────────────
+  document.getElementById('predict').addEventListener('click', () => {
+    const mol = MOLECULES[currentMol];
+    if (TEST_CAFFEINE_FIT && mol && mol.fitFile) {
+      // Test mode: Load pre-made fit PDB for visual verification
+      runFitAnimation(mol.fitFile);
+    } else {
+      // Production mode: Run diffMIP client-side inference
+      runDiffMIPClient();
+    }
+  });
+
+  // ── Download fit PDB ───────────────────────────────────────────────────────
+  document.getElementById('download-fit').addEventListener('click', () => {
+    if (!fitPdbCache) return;
+    const mol = MOLECULES[currentMol];
+    const filename = mol && mol.fitFile ? mol.fitFile.split('/').pop() : 'fit.pdb';
+    const blob = new Blob([fitPdbCache], { type: 'chemical/x-pdb' });
+    const url  = URL.createObjectURL(blob);
+    const a    = document.createElement('a');
+    a.href     = url;
+    a.download = filename;
+    a.click();
+    URL.revokeObjectURL(url);
+  });
+
+  // ── Collapsible sections ────────────────────────────────────────────────────
+  function initCollapsible(headerId, bodyId, startOpen = false) {
+    const header = document.getElementById(headerId);
+    const body   = document.getElementById(bodyId);
+
+    if (!header || !body) {
+      console.warn(`initCollapsible: Could not find elements for ${headerId} or ${bodyId}`);
+      return;
+    }
+
+    if (startOpen) {
+      header.classList.add('open');
+      body.classList.add('open');
+    }
+    header.addEventListener('click', () => {
+      header.classList.toggle('open');
+      body.classList.toggle('open');
+    });
+  }
+
+  initCollapsible('identify-header',  'identify-body',  true);
+  initCollapsible('prediction-header', 'prediction-body', true);
+  initCollapsible('representation-header', 'representation-body', true);
+
+  // ── Identify ───────────────────────────────────────────────────────────────
+  document.getElementById('identify-btn').addEventListener('click', runIdentification);
+
+  // ── Prune (standin) ────────────────────────────────────────────────────────
+  document.getElementById('prune-btn').addEventListener('click', () => {
+    // TODO: implement prune logic
+  });
+
+  // ── Download identify PDB (standin) ────────────────────────────────────────
+  document.getElementById('download-identify').addEventListener('click', () => {
+    // TODO: implement download of identification PDB
+  });
+
+  // ── Toast notification with copy functionality ────────────────
+  window.showToast = function(message, duration = 4000) {
+    const toast = document.getElementById('toast');
+    toast.textContent = message;
+    toast.style.cursor = 'pointer';
+    toast.style.userSelect = 'text';
+    toast.style.pointerEvents = 'auto';
+
+    // Make toast copyable on click
+    const copyHandler = function() {
+      navigator.clipboard.writeText(message).then(() => {
+        const originalText = toast.textContent;
+        toast.textContent = '✓ Copied to clipboard!';
+        setTimeout(() => {
+          toast.textContent = originalText;
+        }, 1000);
+      });
+    };
+
+    toast.onclick = copyHandler;
+    toast.classList.add('visible');
+
+    if (window.toastTimeout) clearTimeout(window.toastTimeout);
+    window.toastTimeout = setTimeout(() => {
+      toast.classList.remove('visible');
+      toast.onclick = null;
+    }, duration);
+  };
+
+  // diffMIP initialization
+  initDiffMIPClient();
+
+  // diffMIP predict button
+  document.getElementById('diffmip-predict').addEventListener('click', runDiffMIPClient);
+
+  // Clear placements button
+  document.getElementById('clear-placements').addEventListener('click', clearPlacements);
+
+  // ── Initial load ───────────────────────────────────────────────
+  console.log('[Viewer] Starting initial load...');
+
+  try {
+    loadMolecule(currentMol);
+  } catch (error) {
+    console.error('[Viewer] Error during initial load:', error);
+  }
+
+})();
+</script>
+
+<script>
+// ── Sidebar Resize Handler ────────────────────────────────────────
+(function() {
+  const resizeHandle = document.getElementById('resize-handle');
+  const sidebar = document.getElementById('sidebar');
+  let isResizing = false;
+  let startX = 0;
+  let startWidth = 0;
+
+  resizeHandle.addEventListener('mousedown', (e) => {
+    isResizing = true;
+    startX = e.clientX;
+    startWidth = sidebar.offsetWidth;
+    document.body.style.cursor = 'ew-resize';
+    document.body.style.userSelect = 'none';
+    e.preventDefault();
+  });
+
+  document.addEventListener('mousemove', (e) => {
+    if (!isResizing) return;
+
+    // Calculate new width (drag left = wider, drag right = narrower)
+    const deltaX = startX - e.clientX;
+    const newWidth = startWidth + deltaX;
+
+    // Apply min/max constraints
+    const minWidth = 200;
+    const maxWidth = 400;
+    const constrainedWidth = Math.max(minWidth, Math.min(maxWidth, newWidth));
+
+    sidebar.style.width = constrainedWidth + 'px';
+  });
+
+  document.addEventListener('mouseup', () => {
+    if (isResizing) {
+      isResizing = false;
+      document.body.style.cursor = '';
+      document.body.style.userSelect = '';
+    }
+  });
+})();
+</script>
+
+<div id="toast"></div>
+<footer>
+  <span>openMIP-web: A quantized version of openMIP</span>
+  <button id="theme-toggle" aria-label="Toggle theme"></button>
+</footer>
+<script src="src/theme.js"></script>
+</body>
+</html>

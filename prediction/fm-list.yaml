@@ -1,0 +1,1316 @@
+fm-list:
+   # Functional Monomers
+   # cost should be in eur / g, synthesis grade, smallest quantity (assuming yearly EHS rules for this one)
+   # if a vendor lists it in ml, then we multiply by density to get g's; not perfect but ok estimate
+   #
+   # EXAMPLE:
+   #    fullname: complete name
+   #    smiles: smiles string
+   #    mw: molecular weight in g/mol
+   #    pubchemid: pubchem id
+   #    cas-number: cas number
+   #    type: acidic/basic/neutral/cationic/zwitterionic/crosslinker
+   #    reaction: reaction method (vinyl, electro)
+   #    available : is this commercially available? true/false
+   #    cost: in EUR/g
+   #    vendor: vendor link
+   AAC:
+      fullname: Acrylic Acid
+      smiles: C=CC(=O)O
+      mw: 72.06
+      pubchemid: 24848810
+      cas-number: '79-10-7'
+      type: acidic
+      reaction: vinyl
+      available : true
+      cost: 0.6552
+      vendor: 'https://www.sigmaaldrich.com/DE/de/product/mm/800181'
+   AAM:
+      fullname: Acrylamide
+      smiles: C=CC(=O)N
+      mw: 71.08
+      pubchemid: 6579
+      cas-number: '79-06-1'
+      type: neutral
+      reaction: vinyl
+      available : true
+      cost: 0.339
+      vendor: 'https://www.sigmaaldrich.com/DE/de/product/mm/800830'
+   ACN:
+      fullname: Acrylonitrile
+      smiles: C=CC#N
+      mw: 53.06
+      pubchemid: 7855
+      cas-number: '107-13-1'
+      type: neutral
+      reaction: vinyl
+      available : true
+      cost: 0.5086
+      vendor: 'https://www.sigmaaldrich.com/DE/en/product/mm/800834'
+   ACRO:
+      fullname: Acrolein
+      smiles: C=CC=O
+      mw: 56.06
+      pubchemid: 24873026
+      cas-number: '107-02-8'
+      type: neutral
+      reaction: vinyl
+      available : false
+      cost:
+      vendor:
+   AEMA:
+      fullname: Aminoethyl methacrylate
+      smiles: CC(=C)C(=O)OCCN
+      mw: 165.42
+      pubchemid: 24873869
+      cas-number: '2420-94-2'
+      type: basic
+      reaction: vinyl
+      available : true
+      cost: 14.72
+      vendor: 'https://www.sigmaaldrich.com/DE/en/product/aldrich/516155'
+   AEMAA:
+      fullname: Aminoethyl methacrylamide
+      smiles: N(CCN)C(=O)C(=C)C
+      mw: 164.63
+      pubchemid: 824909
+      cas-number: '76259-32-0'
+      type: basic
+      reaction: vinyl
+      available : true
+      cost: 106.00
+      vendor: 'https://www.sigmaaldrich.com/DE/en/product/aldrich/900652'
+   ALLY:
+      fullname: Allylamine
+      smiles: C=CCN
+      mw: 57.09
+      pubchemid: 24854462
+      cas-number: '107-11-9'
+      type: basic
+      reaction: vinyl
+      available : true
+      cost: 1.513
+      vendor: 'https://www.sigmaaldrich.com/DE/en/product/aldrich/241075'
+   ALPP:
+      fullname: 1-Allylpiperazine
+      smiles: C=CCN1CCNCC1
+      mw: 126.2
+      pubchemid: 806422
+      cas-number: '13961-36-9'
+      type: basic
+      reaction: vinyl
+      available : true
+      cost: 15.13
+      vendor: 'https://www.sigmaaldrich.com/DE/en/product/bldpharmatechcoltd/bl3h9998f7b5?context=bbe'
+   AT:
+      fullname: Allylthiourea
+      smiles: C=CCNC(=S)N
+      mw: 116.18
+      pubchemid: 1549517
+      cas-number: '109-57-9'
+      type: basic
+      reaction: vinyl
+      available : true
+      cost: 2.252
+      vendor: 'https://www.sigmaaldrich.com/DE/en/product/mm/808158'
+   AMPSA:
+      fullname: Acrylamido Methyl Propanesulfonic Acid
+      smiles: CC(C)(CS(=O)(=O)O)NC(=O)C=C
+      mw: 207.25
+      pubchemid: 24857066
+      cas-number: '15214-89-8'
+      type: acidic
+      reaction: vinyl
+      available : true
+      cost: 0.2028
+      vendor: 'https://www.sigmaaldrich.com/DE/en/product/aldrich/282731'
+   ACMO:
+      fullname: 4-Acryloylmorpholine
+      smiles: C=CC(=O)N1CCOCC1
+      mw: 141.17
+      pubchemid: 24868398
+      cas-number: '5117-12-4'
+      type: neutral
+      reaction: vinyl
+      available : true
+      cost: 1.075
+      vendor: 'https://www.sigmaaldrich.com/DE/en/product/aldrich/448273'
+   APMA:
+      fullname: Aminopropyl methacrylamide
+      smiles: CC(=C)C(=O)NCCCN
+      mw: 178.66
+      pubchemid: 329764619
+      cas-number: '72607-53-5'
+      type: basic
+      reaction: vinyl
+      available : true
+      cost: 78.60
+      vendor: 'https://www.sigmaaldrich.com/DE/en/product/aldrich/731099'
+   APTES:
+      fullname: Aminopropyltriethoxysilane
+      smiles: 'CCO[Si](CCCN)(OCC)OCC'
+      mw: 207.25
+      pubchemid: 24857066
+      cas-number: '15214-89-8'
+      type: acidic
+      reaction: silinize
+      available : true
+      cost: 0.2028
+      vendor: 'https://www.sigmaaldrich.com/DE/en/product/aldrich/282731'
+   p-AS:
+      fullname: p-Aminostyrene
+      smiles: C=CC1=CC=C(C=C1)N
+      mw: 119.16
+      pubchemid: 24875141
+      cas-number: '1520-21-4'
+      type: neutral
+      reaction: vinyl
+      available : true
+      cost: 53.50
+      vendor: "https://www.sigmaaldrich.com/DE/en/product/aldrich/536180"
+   BA:
+      fullname: Butyl acrylate
+      smiles: CCCCOC(=O)C=C
+      mw: 128.17
+      pubchemid: 8846
+      cas-number: '141-32-2'
+      type: acidic
+      reaction: vinyl
+      available : true
+      cost: 0.2614
+      vendor: 'https://www.sigmaaldrich.com/DE/en/product/mm/800832'
+   BZMA:
+      fullname: Benzyl Methacrylate
+      smiles: CC(=C)C(=O)OCC1=CC=CC=C1
+      mw: 176.21
+      pubchemid: 24865646
+      cas-number: '2495-37-6'
+      type:  neutral
+      reaction: vinyl
+      available : true
+      cost: 0.2757
+      vendor: 'https://www.sigmaaldrich.com/DE/en/product/aldrich/409448'
+   BMA:
+      fullname: Butyl Methacrylate
+      smiles: CCCCOC(=O)C(=C)C
+      mw: 142.20
+      pubchemid: 7354
+      cas-number: '97-88-1'
+      type: neutral
+      reaction: vinyl
+      available : true
+      cost: 0.6477
+      vendor: 'https://www.sigmaaldrich.com/DE/en/product/aldrich/235865'
+   CBMA:
+      fullname: Carboxybetaine Methacrylate
+      smiles: O=C(CC[N+](C)(C)CCOC(C(C)=C)=O)[O-]
+      mw: 229.27
+      pubchemid: 57605655
+      cas-number: '24249-95-4'
+      type: zwitterionic
+      reaction: vinyl
+      available : true
+      cost: 61.00
+      vendor: 'https://www.ambeed.com/products/carboxybetaine-methacrylate.html'
+   DAMAS:
+      fullname: Diallyl methylamine
+      smiles: CN(CC=C)CC=C
+      mw: 111.18
+      pubchemid: 24878624
+      cas-number: '2424-01-3'
+      type: crosslinker
+      reaction: vinyl
+      available : true
+      cost: 53.30
+      vendor: 'https://www.sigmaaldrich.com/DE/en/product/aldrich/542687'
+   DEAA:
+      fullname: 2-(Diethylamino)ethyl acrylate
+      smiles: CCN(CC)CCOC(=O)C=C
+      mw: 171.24
+      pubchemid: 24865611
+      cas-number: '2426-54-2'
+      type: basic
+      reaction: vinyl
+      available : true
+      cost: 2.00
+      vendor: 'https://www.sigmaaldrich.com/DE/en/product/aldrich/408972'
+   DEAEMA:
+      fullname: Diethylamino ethyl methacrylate
+      smiles: CCN(CC)CCOC(=O)C(C)=C
+      mw: 185.26
+      pubchemid: 24865612
+      cas-number: '105-16-8'
+      type: cationic
+      reaction: vinyl
+      available : true
+      cost: 0.2390
+      vendor: 'https://www.sigmaaldrich.com/DE/en/product/aldrich/408980'
+   DEGDMA:
+      fullname: Diethylene Glycol Dimethacrylate
+      smiles: CC(=C)C(=O)OCCOCCOC(=O)C(=C)C
+      mw: 242.27
+      pubchemid: 24865615
+      cas-number: '2358-84-1'
+      type: crosslinker
+      reaction: vinyl
+      available : true
+      cost: 0.3082
+      vendor: 'https://www.sigmaaldrich.com/DE/en/product/aldrich/409006'
+   DMAA:
+      fullname: N,N-Dimethylacrylamide
+      smiles: CN(C)C(=O)C=C
+      mw: 99.13
+      pubchemid: 24856566
+      cas-number: '2680-03-7'
+      type: neutral
+      reaction: vinyl
+      available : true
+      cost: 8.919
+      vendor: 'https://www.sigmaaldrich.com/DE/en/product/aldrich/274135'
+   DMAEMA:
+      fullname: Dimethylamino ethyl methacrylate
+      smiles: CC(=C)C(=O)OCCN(C)C
+      mw: 157.21
+      pubchemid: 17869
+      cas-number: '2867-47-2'
+      type: basic
+      reaction: vinyl
+      available : true
+      cost: 1.651
+      vendor: 'https://www.sigmaaldrich.com/DE/en/product/mm/840083'
+   DMAPMAA:
+      fullname: Dimethylamino propyl methacrylamide
+      smiles: CN(C)CCCNC(=O)C(C)=C
+      mw: 170.25
+      pubchemid: 24865649
+      cas-number: '5205-93-6'
+      type: basic
+      reaction: vinyl
+      available : true
+      cost: 0.2851
+      vendor: 'https://www.sigmaaldrich.com/DE/en/product/aldrich/409472'
+   EGDPEA:
+      fullname: Ethylene glycol dicyclopentenyl ether acrylate
+      smiles: C=CC(=O)OCCOC1CC2CC1C3C=CCC23
+      mw: 248.32
+      pubchemid: 24865497
+      cas-number: '65983-31-5'
+      type: acidic
+      reaction: vinyl
+      available : true
+      cost: 0.5354
+      vendor: 'https://www.sigmaaldrich.com/DE/en/product/aldrich/407968'
+   EGMP:
+      fullname: Ethylene glycol methacrylate phosphate
+      smiles: CC(=C)C(=O)OCCOP(O)(O)=O
+      mw: 210.12
+      pubchemid: 819327
+      cas-number: '52628-03-2'
+      type: acidic
+      reaction: vinyl
+      available : true
+      cost: 2.260
+      vendor: 'https://abcr.com/de_en/ab101162'
+   EGMEM:
+      fullname: Ethylene glycol methyl ether methacrylate
+      smiles: COCCOC(=O)C(C)=C
+      mw: 144.17
+      pubchemid: 24865993
+      cas-number: '6976-93-8'
+      type: neutral
+      reaction: vinyl
+      available : true
+      cost: 1.002
+      vendor: 'https://www.sigmaaldrich.com/DE/en/product/aldrich/415332'
+   EGPEA:
+      fullname: Ethylene glycol phenyl ether acrylate
+      smiles: C=CC(=O)OCCOc1ccccc1
+      mw: 192.21
+      pubchemid: 24865560
+      cas-number: '48145-04-6'
+      type: neutral
+      reaction: vinyl
+      available : true
+      cost: 0.4928
+      vendor: 'https://www.sigmaaldrich.com/DE/en/product/aldrich/408336'
+   2-ES:
+      fullname: 2-Ethylstyrene
+      smiles: CCC1=CC=CC=C1C=C
+      mw: 132.20
+      pubchemid:
+      cas-number: '7564-63-8'
+      type: neutral
+      reaction: vinyl
+      available : false
+      cost:
+      vendor:
+   4-ES:
+      fullname: 4-Ethylstyrene
+      smiles: CCC1=CC=C(C=C1)C=C
+      mw: 132.20
+      pubchemid: 18940
+      cas-number: '3454-07-7'
+      type: neutral
+      reaction: vinyl
+      available : true
+      cost: 186.00
+      vendor: 'https://www.aifchem.com/aif/goods/detail/3454-07-7#this'
+   2-FPBA:
+      fullname: 2-Formylphenylboronic acid
+      smiles: B(C1=CC=CC=C1C=O)(O)O
+      mw: 149.94
+      pubchemid: 24867057
+      cas-number: '40138-16-7'
+      type: acidic
+      reaction: electro
+      available : true
+      cost: 45.00
+      vendor: 'https://www.sigmaaldrich.com/DE/en/product/aldrich/431958'
+   3-FPBA:
+      fullname: 3-Formylphenylboronic acid
+      smiles: B(C1=CC(=CC=C1)C=O)(O)O
+      mw: 149.94
+      pubchemid: '87199-16-4'
+      cas-number: 24867694
+      type: acidic
+      reaction: electro
+      available : true
+      cost: 33.40
+      vendor: 'https://www.sigmaaldrich.com/DE/en/product/aldrich/441651'
+   4-FPBA:
+      fullname: 4-Formylphenylboronic acid
+      smiles: B(C1=CC=C(C=C1)C=O)(O)O
+      mw: 149.94
+      pubchemid: '87199-17-5'
+      cas-number: 24867058
+      type: acidic
+      reaction: electro
+      available : true
+      cost: 31.00
+      vendor: 'https://www.sigmaaldrich.com/DE/en/product/aldrich/431966'
+   FFMA:
+      fullname: Furfuryl methacrylate
+      smiles: CC(=C)C(=O)OCc1ccco1
+      mw: 166.17
+      pubchemid: 24865763
+      cas-number: '3454-28-2'
+      type: neutral
+      reaction: vinyl
+      available : true
+      cost: 4.675
+      vendor: 'https://www.sigmaaldrich.com/DE/en/product/aldrich/411760'
+   GMA:
+      fullname: Glycidyl methacrylate
+      smiles: CC(=C)C(=O)OCC1CO1
+      mw: 142.15
+      pubchemid: 329768028
+      cas-number: '106-91-2'
+      type: neutral
+      reaction: vinyl
+      available : true
+      cost: 1.458
+      vendor: 'https://www.sigmaaldrich.com/DE/en/product/aldrich/779342'
+   HEA:
+      fullname: 2-Hydroxyethyl Acrylate
+      smiles: C=CC(=O)OCCO
+      mw: 116.12
+      pubchemid: 24857612
+      cas-number: '818-61-1'
+      type: acidic
+      reaction: vinyl
+      available : true
+      cost: 0.3157
+      vendor: 'https://www.sigmaaldrich.com/DE/en/product/aldrich/292818'
+   HEAA:
+      fullname: Hydroxyethyl acrylamide
+      smiles: C=CC(=O)NCCO
+      mw: 115.13
+      pubchemid: 329761968
+      cas-number: '7646-67-5'
+      type: neutral
+      reaction: vinyl
+      available : true
+      cost: 0.5211
+      vendor: 'https://www.sigmaaldrich.com/DE/en/product/aldrich/697931'
+   HEMA:
+      fullname: Hydroxyethyl methacrylate
+      smiles: CC(=C)C(=O)OCCO
+      mw: 130.14
+      pubchemid: 13360
+      cas-number: '868-77-9'
+      type: neutral
+      reaction: vinyl
+      available : true
+      cost: 0.1723
+      vendor: 'https://www.sigmaaldrich.com/DE/en/product/mm/800588'
+   HPMA:
+      fullname: Hydroxypropyl methacrylamide
+      smiles: CC(=C)C(=O)NCCCO
+      mw: 143.18
+      pubchemid: 329768692
+      cas-number: '21442-02-3'
+      type: neutral
+      reaction: vinyl
+      available : true
+      cost: 59.40
+      vendor: https://www.sigmaaldrich.com/DE/en/product/aldrich/281239
+   IA:
+      fullname: Itaconic Acid
+      smiles: C=C(CC(=O)O)C(=O)O
+      mw: 130.10
+      pubchemid: 24896018
+      cas-number: '97-65-4'
+      type: acidic
+      reaction: vinyl
+      available : true
+      cost: 0.3220
+      vendor: 'https://www.sigmaaldrich.com/DE/en/product/aldrich/i29204'
+   IBA:
+      fullname: Isobutyl acrylate
+      smiles: CC(C)COC(=O)C=C
+      mw: 128.17
+      pubchemid: 24867294
+      cas-number: '106-63-8'
+      type: neutral
+      reaction: vinyl
+      available : true
+      cost: 0.5528
+      vendor: 'https://www.sigmaaldrich.com/DE/en/product/aldrich/436305'
+   IBMA:
+      fullname: Isobutyl methacrylate
+      smiles: CC(C)COC(=O)C(C)=C
+      mw: 142.20
+      pubchemid: 24850279
+      cas-number: '97-86-9'
+      type: neutral
+      reaction: vinyl
+      available : true
+      cost: 0.0887
+      vendor: 'https://www.sigmaaldrich.com/DE/en/product/aldrich/169919'
+   IPTS:
+      fullname: Isobutyltriethoxysilane
+      smiles: 'CCO[Si](CC(C)C)(OCC)OCC'
+      mw: 220.38
+      pubchemid: 329762155
+      cas-number: '17980-47-1'
+      type: neutral
+      reaction: silinize
+      available : true
+      cost: 0.2591
+      vendor: 'https://www.sigmaaldrich.com/DE/en/product/aldrich/699713'
+   MLA:
+      fullname: Maleic Acid
+      smiles: OOCC=CCOO
+      mw: 116.07
+      pubchemid: 444266
+      cas-number: '110-16-7'
+      type: acidic
+      reaction: none
+      available : true
+      cost: 0.4050
+      vendor: 'https://www.sigmaaldrich.com/DE/en/product/mm/800380'
+   MAA:
+      fullname: Methacrylic Acid
+      smiles: CC(=C)C(=O)O
+      mw: 86.09
+      pubchemid: 4093
+      cas-number: '79-41-4'
+      type: acidic
+      reaction: vinyl
+      available : true
+      cost: 0.3176
+      vendor: 'https://www.sigmaaldrich.com/DE/en/product/mm/800578'
+   MALAA:
+      fullname: Methacryloyl L-aspartic acid
+      smiles: 'CC(=C)C(=O)N[C@@H](CC(=O)O)C(=O)O'
+      mw:
+      pubchemid:
+      cas-number:
+      type: acidic
+      reaction: vinyl
+      available : false
+      cost:
+      vendor:
+   MAHSE:
+      fullname: Methacylic acid N-hydroxysuccinimide ester
+      smiles: CC(=C)C(=O)ON1C(=O)CCC1=O
+      mw: 183.16
+      pubchemid: 329764554
+      cas-number: '38862-25-8'
+      type: basic
+      reaction: vinyl
+      available : true
+      cost: 96.60
+      vendor: 'https://www.sigmaaldrich.com/DE/en/product/aldrich/730300'
+   MAM:
+      fullname: Methacrylamide
+      smiles: CC(=C)C(=O)N
+      mw: 85.10
+      pubchemid: 6595
+      cas-number: '79-39-0'
+      type: neutral
+      reaction: vinyl
+      available : true
+      cost: 0.3292
+      vendor: 'https://www.sigmaaldrich.com/DE/en/product/mm/805792'
+   MAPTAC:
+      fullname: "N,N,N-trimethyl-3-[(2-methylacryloyl)amino]propan-1-aminium"
+      smiles: CC(=C)C(=O)NCCC[N+](C)(C)C
+      mw: 185.29
+      pubchemid: 106429
+      cas-number: '51410-72-1'
+      type: zwitterionic
+      reaction: vinyl
+      available : true
+      cost: 0.4311
+      vendor: 'https://www.sigmaaldrich.com/DE/en/product/aldrich/280658?context=product'
+   METC:
+      fullname: '[2-(Methacryloyloxy)ethyl]trimethylammonium'
+      smiles: CC(=C)C(=O)OCC[N+](C)(C)C
+      mw: 207.70
+      pubchemid: 78739
+      cas-number: '5039-78-1'
+      type: zwitterionic
+      reaction: vinyl
+      available : true
+      cost: 0.222
+      vendor: 'https://www.sigmaaldrich.com/DE/en/product/aldrich/408107'
+   MPC:
+      fullname: 2-Methacryloyloxyethyl phosphorylcholine
+      smiles: CC(=C)C(=O)OCCOP(=O)([O-])OCC[N+](C)(C)C
+      mw: 295.27
+      pubchemid: 128934
+      cas-number: '67881-98-5'
+      type: zwitterionic
+      reaction: vinyl
+      available : true
+      cost: 32.60
+      vendor: 'https://www.sigmaaldrich.com/DE/en/product/aldrich/730114'
+   4-META:
+      fullname: 4-Methacryloxyethyl trimellitic anhydride
+      smiles: O1C(=O)c2c(ccc(c2)C(=O)OCCOC(=O)C(=C)C)C1=O
+      mw: 304.25
+      pubchemid: 51027
+      cas-number: '70293-55-9'
+      type: acidic
+      reaction: vinyl
+      available : true
+      cost: 19.10
+      vendor: 'https://www.sigmaaldrich.com/DE/en/product/aldrich/902098'
+   MMA:
+      fullname: Methyl methacrylate
+      smiles: CC(=C)C(=O)OC
+      mw: 100.12
+      pubchemid: 6658
+      cas-number: '80-62-6'
+      type: neutral
+      reaction: vinyl
+      available: true
+      cost: 0.2862
+      vendor: "https://www.sigmaaldrich.com/DE/en/product/mm/800590"
+   4-MS:
+      fullname: 4-Methylstyrene
+      smiles: CC1=CC=C(C=C1)C=C
+      mw: 118.18
+      pubchemid: 12161
+      cas-number: '622-97-9'
+      type: neutral
+      reaction: vinyl
+      available: true
+      cost: 4.769
+      vendor: https://www.sigmaaldrich.com/DE/en/product/aldrich/m80806
+   MPTS:
+      fullname: Methylacryloxyprolyl Trimethoxysilane
+      smiles: CO[Si](CCCOC(=O)C(C)=C)(OC)OC
+      mw: 248.35
+      pubchemid: 24867572
+      cas-number: '2530-85-0'
+      type: neutral
+      reaction: vinyl
+      available : true
+      cost: 0.5971
+      vendor: 'https://www.sigmaaldrich.com/DE/en/product/aldrich/440159'
+   MAAA:
+      fullname: Methyl 2-acetamidoacrylate
+      smiles: COC(=O)C(=C)NC(C)=O
+      mw: 143.14
+      pubchemid: 24859082
+      cas-number: '35356-70-8'
+      type: neutral
+      reaction: vinyl
+      available : true
+      cost: 53.8
+      vendor: 'https://www.sigmaaldrich.com/DE/en/product/aldrich/317519'
+   NMT:
+      fullname: N-(4-Ethenylphenyl)-N'-methylthiourea
+      smiles: CNC(=S)NC1=CC=C(C=C1)C=C
+      mw: 192.28
+      pubchemid: 54429952
+      cas-number: '1483-22-6'
+      type:
+      reaction: vinyl
+      available : false
+      cost:
+      vendor:
+   NIPAM:
+      fullname: N-Isopropylacrylamide
+      smiles: CC(C)NC(=O)C=C
+      mw: 113.16
+      pubchemid: 329764623
+      cas-number: '2210-25-5'
+      type: neutral
+      reaction: vinyl
+      available : true
+      cost: 11.02
+      vendor: 'https://www.sigmaaldrich.com/DE/en/product/aldrich/731129'
+   NPA:
+      fullname: N-Phenylacrylamide
+      smiles: C=CC(=O)NC1=CC=CC=C1
+      mw: 147.17
+      pubchemid: 221792
+      cas-number: '2210-24-4'
+      type: neutral
+      reaction: vinyl
+      available : true
+      cost: 34.40
+      vendor: 'https://www.sigmaaldrich.com/DE/en/product/aldrich/281239'
+   PAM:
+      fullname: Phenyl Acrylamide
+      smiles: C=C(C1=CC=CC=C1)C(=O)N
+      mw: 147.17
+      pubchemid: 24877725
+      cas-number: '2210-24-4'
+      type: neutral
+      reaction: vinyl
+      available : true
+      cost: 34.40
+      vendor: 'https://www.sigmaaldrich.com/DE/en/product/aldrich/530042'
+   PMA:
+      fullname: Phenyl methacrylate
+      smiles: CC(=C)C(=O)Oc1ccccc1
+      mw: 162.19
+      pubchemid: 24864429
+      cas-number: '2177-70-0'
+      type: neutral
+      reaction: vinyl
+      available : true
+      cost: 7.605
+      vendor: 'https://www.sigmaaldrich.com/DE/en/product/aldrich/392162'
+   PPMA:
+      fullname: Propyl methacrylate
+      smiles: CCCOC(=O)C(C)=C
+      mw: 128.17
+      pubchemid: 329766190
+      cas-number: '2210-28-8'
+      type: neutral
+      reaction: vinyl
+      available : true
+      cost: 8.16
+      vendor: 'https://www.sigmaaldrich.com/DE/en/product/aldrich/751162'
+   PY:
+      fullname: Pyrrole
+      smiles: C1=CNC=C1
+      mw: 67.09
+      pubchemid: 8027
+      cas-number: '109-97-7'
+      type: basic
+      reaction: none
+      available : true
+      cost: 2.585
+      vendor: 'https://www.sigmaaldrich.com/DE/en/product/mm/807492'
+   PVP:
+      fullname: 4-Vinylphenol
+      smiles: C=CC1=CC=C(C=C1)O
+      mw: 120.15
+      pubchemid: 62453
+      cas-number: '2628-17-3'
+      type: acidic
+      reaction: vinyl
+      available : true
+      cost: 12.36
+      vendor: 'https://www.carlroth.com/de/de/forschungschemikalien/4-vinylphenol/p/2y41.4'
+   SBMA:
+      fullname: Sulfobetaine Methacrylate
+      smiles: CC(=C)C(=O)OCC[N+](C)(C)CCCS(=O)(=O)O
+      mw: 279.35
+      pubchemid: 77194
+      cas-number: '3637-26-1'
+      type: zwitterionic
+      reaction: vinyl
+      available : true
+      cost: 1.50
+      vendor: 'https://www.sigmaaldrich.com/DE/en/product/aldrich/537284'
+   STYR:
+      fullname: Phenylethene (Styrene)
+      smiles: C=CC1=CC=CC=C1
+      mw: 104.15
+      pubchemid: 7501
+      cas-number: '100-42-5'
+      type: neutral
+      reaction: vinyl
+      available : true
+      cost: 0.2969
+      vendor: 'https://www.sigmaaldrich.com/DE/en/product/aldrich/281239'
+   TBA:
+      fullname: N-tert-Butylacrylamide
+      smiles: CC(C)(C)NC(=O)C=C
+      mw: 127.18
+      pubchemid: 24865764
+      cas-number: '107-58-4'
+      type: neutral
+      reaction: vinyl
+      available : true
+      cost: 1.21
+      vendor: 'https://www.sigmaaldrich.com/DE/en/product/aldrich/411779'
+   TBFM:
+      fullname: "1-(4-Vinylphenyl)-3-(3,5-bis(trifluoromethyl)phenyl)urea"
+      smiles: C=CC1=CC=C(C=C1)NC(=O)NC2=CC(=CC(=C2)C(F)(F)F)C(F)(F)F
+      mw: 374.28
+      pubchemid: 11474265
+      cas-number:
+      type: neutral
+      reaction: vinyl
+      available : true
+      cost: 453.00
+      vendor: 'https://arctomsci.com/AC1819282-1'
+   TFMAA:
+      fullname: Trifluoromethacrylic Acid
+      smiles: C=C(C(=O)O)C(F)(F)F
+      mw: 140.06
+      pubchemid: 24862803
+      cas-number: '381-98-6'
+      type: acidic
+      reaction: vinyl
+      available : true
+      cost: 24.60
+      vendor: 'https://www.sigmaaldrich.com/DE/en/product/aldrich/369144'
+   UCA:
+      fullname: Urocanic Acid
+      smiles: C1=C(NC=N1)/C=C/C(=O)O
+      mw: 138.12
+      pubchemid: 329827646
+      cas-number: '7699-35-6'
+      type: acidic
+      reaction: electro
+      available : true
+      cost: 30800.00
+      vendor: https://www.sigmaaldrich.com/DE/en/product/sigma/u6883
+   UCAEE:
+      fullname: Urocanic Acid Ethyl Ester
+      smiles: CCOC(=O)/C=C/C1=CN=CN1
+      mw: 166.18
+      pubchemid: 6365633
+      cas-number:  '27538-35-8'
+      type: neutral
+      reaction: electro
+      available : false
+      cost: 476.00
+      vendor: 'https://astatechinc.com/CPSResult.php?CRNO=122022'
+   p-VBA:
+      fullname: p-Vinylbenzoic Acid
+      smiles: C=CC1=CC=C(C=C1)C(=O)O
+      mw: 148.16
+      pubchemid: 24855403
+      cas-number: '1075-49-6'
+      type: acidic
+      reaction: vinyl
+      available : true
+      cost: 76.70
+      vendor: 'https://www.sigmaaldrich.com/DE/en/product/aldrich/254738'
+   VNA:
+      fullname: 4-Vinylbenzlamine
+      smiles: C=CC1=CC=C(C=C1)CN
+      mw: 133.19
+      pubchemid: 11073466
+      cas-number: '50325-49-0'
+      type: basic
+      reaction: vinyl
+      available : true
+      cost: 123.00
+      vendor: 'https://www.ambeed.com/products/50325-49-0.html'
+   VBC:
+      fullname: Vinylbenzyl Chloride
+      smiles: C=CC1=CC=C(C=C1)CCl
+      mw: 152.62
+      pubchemid: 57653590
+      cas-number: '30030-25-2'
+      type: neutral
+      reaction: vinyl
+      available : true
+      cost: 1.468
+      vendor: 'https://www.sigmaaldrich.com/DE/en/product/aldrich/94908'
+   NVCL:
+      fullname: N-Vinylcaprolactam
+      smiles: C=CN1CCCCCC1=O
+      mw: 139.19
+      pubchemid: 24866004
+      cas-number: '2235-00-9'
+      type: neutral
+      reaction: vinyl
+      available : true
+      cost: 0.5120
+      vendor: 'https://www.sigmaaldrich.com/DE/en/product/aldrich/415464'
+   NVF:
+      fullname: N-Vinylformamide
+      smiles: C=CNC=O
+      mw: 71.08
+      pubchemid: 24868334
+      cas-number: '13162-05-5'
+      type: neutral
+      reaction: vinyl
+      available : true
+      cost: 0.6824
+      vendor: 'https://www.sigmaaldrich.com/DE/en/product/aldrich/447331'
+   VPA:
+      fullname: Vinylphosphonic Acid
+      smiles: C=CP(=O)(O)O
+      mw: 108.03
+      pubchemid: 24864665
+      cas-number: '1746-03-8'
+      type: acidic
+      reaction: vinyl
+      available : true
+      cost: 10.708
+      vendor: 'https://www.sigmaaldrich.com/DE/en/product/aldrich/396311'
+   9-VC:
+      fullname: 9-Vinylcarbazole
+      smiles: C=Cn1c2ccccc2c3ccccc13
+      mw: 193.24
+      pubchemid: 24856771
+      cas-number: '1484-13-5'
+      type: cationic
+      reaction: vinyl
+      available : true
+      cost: 3.224
+      vendor: 'https://www.sigmaaldrich.com/DE/en/product/aldrich/277592'
+   1-VI:
+      fullname: 1-vinylimidazole
+      smiles: C=CN1C=CN=C1
+      mw: 94.11
+      pubchemid: 24854105
+      cas-number: '1072-63-5'
+      type: neutral
+      reaction: vinyl
+      available : true
+      cost: 1.40
+      vendor: 'https://www.sigmaaldrich.com/DE/en/product/aldrich/235466'
+   45-VI:
+      fullname: 4,5-vinylimidazole
+      smiles: C=CC=1NC=NC1
+      mw: 94.117
+      pubchemid: 271079
+      cas-number: '3718-04-5'
+      type: basic
+      reaction: vinyl
+      available : true
+      cost: 265.00
+      vendor: 'https://arctomsci.com/3718-04-5-817861'
+   2-VP:
+      fullname: 2-vinylpyridine
+      smiles: C=CC1=CC=CC=N1
+      mw: 105.14
+      pubchemid: 24848047
+      cas-number: '100-69-6'
+      type: neutral
+      reaction: vinyl
+      available : true
+      cost: 5.216
+      vendor: 'https://www.sigmaaldrich.com/DE/en/product/aldrich/132292'
+   4-VP:
+      fullname: 4-vinylpyridine
+      smiles: C=CC1=CC=NC=C1
+      mw: 105.14
+      pubchemid: 24900739
+      cas-number: '100-43-6'
+      type: neutral
+      reaction: vinyl
+      available : true
+      cost: 4.902
+      vendor: 'https://www.sigmaaldrich.com/DE/en/product/aldrich/v3204'
+   2-VPBA:
+      fullname: 2-vinylphenylboronic acid
+      smiles: B(C1=CC=CC=C1C=C)(O)O
+      mw: 147.97
+      pubchemid: 2773587
+      cas-number: '15016-42-9'
+      type: acidic
+      reaction: vinyl
+      available : true
+      cost: 15.00
+      vendor: 'https://www.sigmaaldrich.com/DE/en/product/fluorochempreferredpartner/fluh99c86e34?context=bbe'
+   3-VPBA:
+      fullname: 3-vinylphenylboronic acid
+      smiles: B(C1=CC(=CC=C1)C=C)(O)O
+      mw: 147.97
+      pubchemid: 248885576
+      cas-number: '15016-43-0'
+      type: acidic
+      reaction: vinyl
+      available : true
+      cost: 121.24
+      vendor: 'https://www.sigmaaldrich.com/DE/en/product/synthonixcorporation/sy3h5815fb3d?context=bbe'
+   4-VPBA:
+      fullname: 4-vinylphenylboronic acid
+      smiles: B(C1=CC=C(C=C1)C=C)(O)O
+      mw: 147.97
+      pubchemid: 24866162
+      cas-number: '2156-04-9'
+      type: acidic
+      reaction: vinyl
+      available : true
+      cost: 59.60
+      vendor: 'https://www.sigmaaldrich.com/DE/en/product/aldrich/417580'
+   VPD:
+      fullname: Vinyl pyrrolidone
+      smiles: C=CN1CCCC1=O
+      mw: 111.14
+      pubchemid:
+      cas-number: '88-12-0'
+      type: neutral
+      reaction: vinyl
+      available : true
+      cost: 5.673
+      vendor: 'https://www.sigmaaldrich.com/DE/en/product/mm/808518'
+   # Cross-linkers
+   AMA:
+      fullname: Allyl Methacrylate
+      smiles: CC(=C)C(=O)OCC=C
+      mw: 126.15
+      pubchemid: 24854066
+      cas-number: '96-05-9'
+      type: neutral
+      reaction: vinyl
+      available : true
+      cost: 0.719
+      vendor: 'https://www.sigmaaldrich.com/DE/en/product/aldrich/234931'
+   BAAPY:
+      fullname: Bis(acrylamido)pyridine
+      smiles: C=CC(=O)NC1=NC(=CC=C1)NC(=O)C=C
+      mw: 217.22
+      pubchemid: 12167933
+      cas-number: '147075-91-0'
+      type: crosslinker
+      reaction: vinyl
+      available : true
+      cost: 390.00
+      vendor: 'https://www.a2bchem.com/147075-91-0.html'
+   BAPA:
+      fullname: 1,4-Bis(acryloyl)piperazine
+      smiles: C=CC(=O)N1CCN(CC1)C(=O)C=C
+      mw: 194.23
+      pubchemid: 329750497
+      cas-number: '6342-17-2'
+      type: crosslinker
+      reaction: vinyl
+      available : true
+      cost: 57.80
+      vendor: 'https://www.sigmaaldrich.com/DE/en/product/sigma/14470'
+   BIS:
+      fullname: Methylenebisacrylamide
+      smiles: C=CC(=O)NCNC(=O)C=C
+      mw: 154.17
+      pubchemid: 24848761
+      cas-number: '110-26-9'
+      type: crosslinker
+      reaction: vinyl
+      available : true
+      cost: 0.5120
+      vendor: 'https://www.sigmaaldrich.com/DE/en/product/sial/146072'
+   DAC:
+      fullname: Diallyl Carbonate
+      smiles: C=CCOC(=O)OCC=C
+      mw: 142.15
+      pubchemid: 24856852
+      cas-number: '15022-08-9'
+      type: crosslinker
+      reaction: vinyl
+      available : true
+      cost: 18.08
+      vendor: 'https://www.sigmaaldrich.com/DE/en/product/aldrich/281239'
+   DIPB:
+      fullname: 1,3-Diisopropenylbenzene
+      smiles: CC(=C)C1=CC(=CC=C1)C(=C)C
+      mw: 158.24
+      pubchemid: 77353
+      cas-number: '3748-13-8'
+      type: crosslinker
+      reaction: vinyl
+      available : true
+      cost: 10.30
+      vendor: 'https://www.sigmaaldrich.com/DE/en/product/bldpharmatechcoltd/bl3h97e28718?context=bbe'
+   m-DVB:
+      fullname: m-Divinylbenzene
+      smiles: C=CC1=CC(C=C)=CC=C1
+      mw: 130.19
+      pubchemid: 7941
+      cas-number: '108-57-6'
+      type: crosslinker
+      reaction: vinyl
+      available : true
+      cost: 52.00
+      vendor: 'https://www.ambeed.com/products/108-57-6.html'
+   o-DVB:
+      fullname: o-Divinylbenzene
+      smiles: C=CC1=C(C=C)C=CC=C1
+      mw: 130.19
+      pubchemid: 66666
+      cas-number:  '9003-69-4'
+      type: crosslinker
+      reaction: vinyl
+      available : true
+      cost: 0.4395
+      vendor: 'https://www.thermofisher.com/order/catalog/product/202231000'
+   p-DVB:
+      fullname: p-Divinylbenzene
+      smiles: C=CC1=CC=C(C=C)C=C1
+      mw: 130.19
+      pubchemid: 24878089
+      cas-number: '105-06-6'
+      type: crosslinker
+      reaction: vinyl
+      available : true
+      cost: 94.97
+      vendor: 'https://www.sigmaaldrich.com/DE/en/product/aldrich/535583'
+   EBAM:
+      fullname: Ethylenebisacrylamide
+      smiles: C=CC(=O)NCCNC(=O)C=C
+      mw: 168.19
+      pubchemid: 24862033
+      cas-number: '2956-58-3'
+      type: crosslinker
+      reaction: vinyl
+      available : true
+      cost: 27.54
+      vendor: 'https://www.thermofisher.com/order/catalog/product/L12544.06'
+   EGDMA:
+      fullname: Ethylene glycol dimethacrylate
+      smiles: CC(=C)C(=O)OCCOC(=O)C(=C)C
+      mw: 198.22
+      pubchemid: 24860340
+      cas-number: '97-90-5'
+      type: crosslinker
+      reaction: vinyl
+      available : true
+      cost: 7.371
+      vendor: 'https://www.sigmaaldrich.com/DE/en/product/aldrich/335681'
+   MEP:
+      fullname: 2-(methacryloyloxy)ethyl phosphate
+      smiles: CC(=C)C(=O)OCCOP(O)(=O)OCCOC(=O)C(C)=C
+      mw: 322.25
+      pubchemid: 24873081
+      cas-number: '32435-46-4'
+      type: crosslinker
+      reaction: vinyl
+      available : true
+      cost: 0.750
+      vendor: 'https://www.sigmaaldrich.com/DE/en/product/aldrich/496758'
+   NOBE:
+      fullname: N,O-Bismethacryloyl ethanolamine
+      smiles: CC(=C)C(=O)NCCOC(=O)C(=C)C
+      mw: 197.234
+      pubchemid:
+      cas-number:
+      type: crosslinker
+      reaction: vinyl
+      available : false
+      cost:
+      vendor:
+   PDMA:
+      fullname: 1,4-Phenylene dimethacrylate
+      smiles: CC(=C)C(=O)Oc1ccc(OC(=O)C(C)=C)cc1
+      mw: 246.26
+      pubchemid: 329767612
+      cas-number: '3049-31-8'
+      type: crosslinker
+      reaction: vinyl
+      available : true
+      cost: 129.00
+      vendor: 'https://www.sigmaaldrich.com/DE/en/product/aldrich/773239'
+   PE3A:
+      fullname: Pentaerythritol triacrylate
+      smiles: C=CC(=O)OCC(CO)(COC(=O)C=C)COC(=O)C=C
+      mw: 298.291
+      pubchemid: 19042
+      cas-number: '3524-68-3'
+      type: crosslinker
+      reaction: vinyl
+      available : true
+      cost: 0.1387
+      vendor: 'https://www.thermofisher.com/order/catalog/product/015705.36?SID=srch-srp-015705.36'
+   PE4A:
+      fullname: Pentaerythritol tetraacrylate
+      smiles: C=CC(=O)OCC(COC(=O)C=C)(COC(=O)C=C)COC(=O)C=C
+      mw: 352.34
+      pubchemid: 24865554
+      cas-number: '4986-89-4'
+      type: crosslinker
+      reaction: vinyl
+      available : true
+      cost: 0.6025
+      vendor: 'https://www.sigmaaldrich.com/DE/en/product/aldrich/408263'
+   TEOS:
+      fullname: Triethoxysilane
+      smiles: '[H][Si](OCC)(OCC)OCC'
+      mw: 164.27
+      pubchemid: 24864320
+      cas-number: '998-30-1'
+      type: crosslinker
+      reaction: silinize
+      available : true
+      cost: 5.753
+      vendor: 'https://www.sigmaaldrich.com/DE/en/product/aldrich/390143'
+   TMPD:
+      fullname: Trimethylolpropane diacrylate
+      smiles: CCC(CO)(COC(=O)C(=C)C)COC(=O)C(=C)C
+      mw: 242.27
+      pubchemid: 161941
+      cas-number: '37275-47-1'
+      type: crosslinker
+      reaction: vinyl
+      available : true
+      cost: 1950.00
+      vendor: 'https://www.accelachem.com/cn/search.html?keyword=SY423024&attname=GoodsCode'
+   TRIM:
+      fullname: Trimethylolpropane trimethacrylate
+      smiles: CCC(COC(=O)C(=C)C)(COC(=O)C(=C)C)COC(=O)C(=C)C
+      mw: 338.40
+      pubchemid: 24854829
+      cas-number: '3290-92-4'
+      type: crosslinker
+      reaction: vinyl
+      available : true
+      cost: 0.5070
+      vendor: 'https://www.sigmaaldrich.com/DE/en/product/aldrich/246840'
+   VA:
+      fullname: Vinyl Acrylate
+      smiles: C=COC(=O)C=C
+      mw: 98.10
+      pubchemid: 329767495
+      cas-number: '2177-18-6'
+      type: crosslinker
+      reaction: vinyl
+      available : true
+      cost: 68.215
+      vendor: 'https://www.sigmaaldrich.com/DE/en/product/aldrich/771422'
+   VMA:
+      fullname: Vinyl Methacrylate
+      smiles: CC(=C)C(=O)OC=C
+      mw: 112.13
+      pubchemid: 24867203
+      cas-number: '4245-37-8'
+      type: crosslinker
+      reaction: vinyl
+      available : true
+      cost: 1.8778
+      vendor: 'https://www.sigmaaldrich.com/DE/en/product/aldrich/434620'
+   AAPAMNA:
+      fullname: N-(4-carbamimidoylphenyl)prop-2-enamide
+      smiles: C=CC(=O)NC1=CC=C(C=C1)C(=N)N
+      mw: 189.21
+      pubchemid: 9920590
+      cas-number:
+      type: neutral
+      reaction: vinyl
+      available : false
+      cost: 0.00
+      vendor: 'none'
+   POEA:
+      fullname: Phenoxyethyl acrylate
+      smiles: C=CC(=O)OCCOC1=CC=CC=C1
+      mw: 192.21
+      pubchemid: 39485
+      cas-number:
+      type: basic
+      reaction: vinyl
+      available : true
+      cost: 0.64
+      vendor: "https://www.tcichemicals.com/DE/en/p/A1400"
+   EGDA:
+      fullname: Ethylene Glycol Diacrylate
+      smiles: C=CC(=O)OCCOC(=O)C=C
+      mw: 170.16
+      pubchemid: 75282
+      cas-number: '2274-11-5'
+      type: crosslinker
+      reaction: vinyl
+      available : true
+      cost: 22.53
+      vendor: "https://www.thermofisher.com/order/catalog/product/366970050"
+   TEGDMA:
+      fullname: Triethylene Glycol Dimethacrylate
+      smiles: CC(=C)C(=O)OCCOCCOCCOC(=O)C(=C)C
+      mw: 286.32
+      pubchemid: 7979
+      cas-number: 109-16-0
+      type: crosslinker
+      reaction: vinyl
+      available : true
+      cost: 0.37
+      vendor: 'https://www.sigmaaldrich.com/DE/en/product/aldrich/261548?utm_source=pubchem&utm_campaign=pubchem_2017&utm_medium=referral'
+   AGA:
+      fullname: N-acryloyl-d-glucosamine
+      smiles: "C=CC(=O)N[C@@H]1[C@H]([C@@H]([C@H](OC1O)CO)O)O"
+      mw: 233.22
+      pubchemid: 14455563
+      cas-number:
+      type: neutral
+      reaction: vinyl
+      available : False
+      cost:
+      vendor:
+   NMDG:
+      fullname: N-Methyl-D-glucamine
+      smiles: "CNC[C@@H]([C@H]([C@@H]([C@@H](CO)O)O)O)O"
+      mw: 195.21
+      pubchemid: 8567
+      cas-number: 6284-40-8
+      type: basic
+      reaction: none
+      available : true
+      cost: 0.58
+      vendor: https://www.sigmaaldrich.com/DE/en/product/sial/66930?utm_source=pubchem&utm_campaign=pubchem_2017&utm_medium=referral
+   VBTA:
+      fullname: (Vinylbenzyl)trimethylammonium chloride
+      smiles: "C[N+](C)(C)CC1=CC=C(C=C1)C=C"
+      mw: 211.73
+      pubchemid: 24869493
+      cas-number: 26616-35-3
+      type: cationic
+      reaction: vinyl
+      available : True
+      cost: 2.65
+      vendor: https://www.sigmaaldrich.com/DE/en/product/aldrich/458694
+   # EXAMPLE:
+   #    fullname:
+   #    smiles:
+   #    mw:
+   #    pubchemid:
+   #    cas-number:
+   #    type:
+   #    reaction:
+   #    available :
+   #    cost:
+   #    vendor:
+   # Add New FMs after this for backwards compatibility
+   # EXAMPLE:
+   #    fullname:
+   #    smiles:
+   #    mw:
+   #    pubchemid:
+   #    cas-number:
+   #    type:
+   #    reaction:
+   #    available :
+   #    cost:
+   #    vendor:
+
+
+fm-equivalency:
+    MBAA: BIS
+    ATU: AT
+    26-BAP: BAAPY
+    PAS: p-AS
+    ST: STYR
+    VIN: 1-VI
+    VIM: 1-VI
+    NHS-MA: MAHSE

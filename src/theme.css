@@ -43,10 +43,11 @@ body {
   font-family: 'Segoe UI', system-ui, sans-serif;
   background: var(--bg-page);
   color: var(--text);
-  min-height: 100vh;
+  height: 100vh;
   display: flex;
   flex-direction: column;
   transition: background 0.2s, color 0.2s;
+  overflow: hidden;
 }
 
 /* ── Header ── */
