@@ -1534,14 +1534,14 @@ async function buildReceptorIteratively(
 
           validPlacementsCount++;
 
-          // Score against all placed monomers
-          const monomerScores = [];
-          for (const placed of placedMonomers) {
-            const monoScore = await scorePlacementAgainstPlaced(placement, placed);
-            if (monoScore) {
-              monomerScores.push(monoScore.energy_total);  // Use energy_total
-            }
-          }
+          // Score against all placed monomers (PARALLELIZED)
+          const monomerScorePromises = placedMonomers.map(placed =>
+            scorePlacementAgainstPlaced(placement, placed)
+          );
+          const monomerScoreResults = await Promise.all(monomerScorePromises);
+          const monomerScores = monomerScoreResults
+            .filter(score => score !== null)
+            .map(score => score.energy_total);  // Use energy_total
 
           // Combined score: target interaction + penalty for monomer overlaps
           const totalMonomerScore = monomerScores.reduce((sum, s) => sum + s, 0);
@@ -2373,32 +2373,22 @@ async function computeScoresForPlacements(placements) {
 
   const loadingMsg = document.querySelector('#loading p');
 
-  // PHASE 1: Generate all structures first
-  console.log(`[computeScoresForPlacements] Phase 1: Generating structures...`);
+  // PHASE 1: Generate all structures first (PARALLELIZED)
+  console.log(`[computeScoresForPlacements] Phase 1: Generating structures in parallel...`);
   updateProgress('Generating Structures', `Generating 3D structures for ${placements.length} placements...`, 88);
   if (loadingMsg) {
     loadingMsg.textContent = 'Generating 3D structures…';
   }
 
-  const placementsWithStructures = [];
-
-  for (let i = 0; i < placements.length; i++) {
-    const p = placements[i];
-
-    // Update progress periodically
-    if (i % 5 === 0 && placements.length > 10) {
-      const structProgress = 88 + (i / placements.length) * 4;
-      updateProgress('Generating Structures', `Generating structure ${i + 1}/${placements.length}...`, structProgress);
-    }
-
+  // Process all placements in parallel
+  const structurePromises = placements.map(async (p, i) => {
     try {
-      // Generate 3D structure from SMILES
+      // Generate 3D structure from SMILES (synchronous operation)
       const result = generateStructureFromSMILES(p.smiles);
 
       if (!result) {
         console.warn(`Failed to generate structure for ${p.code}`);
-        placementsWithStructures.push({ ...p, score: null, structureText: null });
-        continue;
+        return { ...p, score: null, structureText: null };
       }
 
       // Center coordinates at origin
@@ -2447,46 +2437,39 @@ async function computeScoresForPlacements(placements) {
 
       const transformedPDB = newPdbLines.join('\n');
 
-      placementsWithStructures.push({
+      return {
         ...p,
         structureText: transformedPDB,
         positions: transformedCoords  // Store transformed coordinates for label positioning
-      });
+      };
 
     } catch (error) {
       console.error(`Error processing ${p.code}:`, error);
-      placementsWithStructures.push({ ...p, score: null, structureText: null });
+      return { ...p, score: null, structureText: null };
     }
-  }
+  });
 
-  console.log(`[computeScoresForPlacements] Phase 1 complete: Generated ${placementsWithStructures.length} structures`);
+  // Wait for all structures to be generated
+  const placementsWithStructures = await Promise.all(structurePromises);
 
-  // PHASE 2: Score each placement
+  console.log(`[computeScoresForPlacements] Phase 1 complete: Generated ${placementsWithStructures.length} structures (parallel)`);
+
+  // PHASE 2: Score each placement (PARALLELIZED)
   if (ENABLE_MONOMER_MONOMER_INTERACTIONS) {
-    console.log(`[computeScoresForPlacements] Phase 2: Computing scores WITH monomer-monomer interactions...`);
+    console.log(`[computeScoresForPlacements] Phase 2: Computing scores WITH monomer-monomer interactions in parallel...`);
   } else {
-    console.log(`[computeScoresForPlacements] Phase 2: Computing scores (target-monomer only)...`);
+    console.log(`[computeScoresForPlacements] Phase 2: Computing scores (target-monomer only) in parallel...`);
   }
 
-  const scoredPlacements = [];
+  updateProgress('Computing Scores', `Scoring ${placementsWithStructures.length} placements...`, 92);
+  if (loadingMsg && placementsWithStructures.length > 1) {
+    loadingMsg.textContent = `Scoring placements…`;
+  }
 
-  for (let i = 0; i < placementsWithStructures.length; i++) {
-    const p = placementsWithStructures[i];
-
-    // Update loading message with progress
-    if (loadingMsg && placementsWithStructures.length > 1) {
-      loadingMsg.textContent = `Scoring placements (${i + 1}/${placementsWithStructures.length})…`;
-    }
-
-    // Update progress periodically
-    if (i % 2 === 0 || placementsWithStructures.length < 10) {
-      const scoreProgress = 92 + (i / placementsWithStructures.length) * 3;
-      updateProgress('Computing Scores', `Scoring placement ${i + 1}/${placementsWithStructures.length}...`, scoreProgress);
-    }
-
+  // Process all scoring in parallel
+  const scoringPromises = placementsWithStructures.map(async (p, i) => {
     if (!p.structureText) {
-      scoredPlacements.push({ ...p, score: null });
-      continue;
+      return { ...p, score: null };
     }
 
     // Compute physics-based score
@@ -2525,13 +2508,16 @@ async function computeScoresForPlacements(placements) {
       console.warn(`Cannot score ${p.code}: PhysicsScoring=${typeof window.PhysicsScoring}, rawPdbText=${!!rawPdbText}`);
     }
 
-    scoredPlacements.push({
+    return {
       ...p,
       score: score
-    });
-  }
+    };
+  });
 
-  console.log(`[computeScoresForPlacements] ✓ Scored ${scoredPlacements.length} placements`);
+  // Wait for all scoring to complete
+  const scoredPlacements = await Promise.all(scoringPromises);
+
+  console.log(`[computeScoresForPlacements] ✓ Scored ${scoredPlacements.length} placements (parallel)`);
 
   // Log summary statistics
   const withScores = scoredPlacements.filter(p => p.score !== null);
